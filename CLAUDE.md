@@ -47,6 +47,21 @@ Both are gitignored. The read-only Drive API key hardcoded in `dashboard.html` i
 intentionally public (restricted to Drive API only, folder is already publicly viewable)
 — that one is fine to ship.
 
+## The `archived_pages/` folder — why it exists, don't delete it
+
+30 sources are saved landing/catalog pages (paywalled or book-only citations with no
+real PDF) rather than full-text PDFs. Real PDFs are served straight from Drive's
+embedded viewer, but Drive's viewer can't render raw HTML as a live page — it just shows
+source text — so these 30 stay as local files in `archived_pages/`, referenced via
+`local_file` in `sources.json`, and are the *primary* render path (checked before
+falling back to the original external URL in `bestSrc()` in `dashboard.html`).
+
+If `archived_pages/` ever goes missing (e.g. someone deletes it again for being
+"redundant" with Drive — it isn't, for this specific reason), regenerate it with
+`node scripts/restore_archived_pages.js`, which re-downloads the HTML files from Drive
+(they live there too, just not renderable inline from there) and relinks `local_file`
+in `sources.json` automatically.
+
 ## Uploading/deleting files in Drive on the user's behalf
 
 `scripts/drive_upload.js <files...>` and `scripts/drive_delete.js <fileIds...>` handle

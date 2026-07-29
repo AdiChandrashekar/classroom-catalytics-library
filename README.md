@@ -53,10 +53,11 @@ all of them at once:
   Markdown (`.md`) and Word (`.doc`) — both generated entirely in your browser, no
   server involved.
 
-**Opening a source:** click "Open" anywhere and it loads in an embedded pop-up — PDFs
-render inline via Google Drive's viewer, and pages with no downloadable file open their
-original source page. Every pop-up also has "Open in new tab ↗" if you'd rather leave
-the dashboard entirely.
+**Opening a source:** click "Open" anywhere and it loads in an embedded pop-up. PDFs
+render inline via Google Drive's viewer; sources with no downloadable PDF (a paywalled
+or book-only citation) open their original page instead — some external sites block
+being shown inside another page, in which case "Open in new tab ↗" (always available in
+the pop-up) is the reliable fallback.
 
 **Filters** live as compact dropdown pills (Theme / Geography / Method / Construct /
 Access) rather than a permanently expanded wall of chips — click one to open its
@@ -79,11 +80,14 @@ You can also get there anytime from inside the dashboard — click the **📁** 
 the sync button in the header, which opens the folder in the same in-page pop-up used
 for everything else (with "open in new tab" available too).
 
-**Adding a new source:** drop a PDF into the folder using the naming convention
-`<next-id>_short-title.pdf` and it'll be picked up on the next sync — matched sources
-get archived automatically, and anything the automatic classifier doesn't recognize
-gets flagged "Needs Review" in the mind map rather than silently mis-tagged, until it's
-gone through and properly categorized.
+**Adding a new source:** just drop a file in — any filename works, there's no naming
+convention you need to follow. On the next sync, it shows up automatically, tagged by
+keyword matching wherever it can be, and filed under "⚑ Unsorted / Needs Review" in the
+mind map otherwise (so it's never silently mis-tagged, just flagged for a proper pass
+later). The `<id>_short-title` naming pattern you'll notice on the existing files is
+only relevant for linking a file back to a specific pre-written citation already in the
+bibliography — it's an internal convention for the maintainer, not a requirement for
+anyone adding new material.
 
 ---
 
