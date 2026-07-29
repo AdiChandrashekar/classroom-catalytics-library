@@ -1,0 +1,8 @@
+# Secrets — never commit these
+.drive_oauth_token.json
+scripts/.drive_credentials.json
+
+# Working files from the detect/classify pipeline
+new_files_report.json
+classification.json
+.tmp_detect/

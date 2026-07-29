@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Classroom Catalytics Library</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @font-face{
+    font-family:"Libertinus Math"; font-style:normal; font-weight:400; font-display:swap;
+    src:url("fonts/libertinusmath-regular.woff2") format("woff2");
+  }
+  @font-face{
+    font-family:"Lato"; font-style:normal; font-weight:300; font-display:swap;
+    src:url("fonts/lato-normal-300.woff2") format("woff2");
+  }
+  @font-face{
+    font-family:"Lato"; font-style:normal; font-weight:400; font-display:swap;
+    src:url("fonts/lato-normal-400.woff2") format("woff2");
+  }
+  @font-face{
+    font-family:"Lato"; font-style:italic; font-weight:400; font-display:swap;
+    src:url("fonts/lato-italic-400.woff2") format("woff2");
+  }
+  @font-face{
+    font-family:"Lato"; font-style:normal; font-weight:700; font-display:swap;
+    src:url("fonts/lato-normal-700.woff2") format("woff2");
+  }
+  @font-face{
+    font-family:"Lato"; font-style:normal; font-weight:900; font-display:swap;
+    src:url("fonts/lato-normal-900.woff2") format("woff2");
+  }
+
+  :root{
+    /* palette (adjusted for readability): Dusty Olive · Apricot Cream · Coffee Bean · Aquamarine · Vibrant Coral */
+    --dusty:#788475;       /* original — used for fills/shapes/tag chips */
+    --apricot:#f7d08a;     /* original — used for soft fills only, too light for text */
+    --coffee:#1e000e;      /* original — primary ink, near-black */
+    --aqua:#a5ffd6;        /* original — used for soft fills only, too light for text */
+    --coral:#ff6f59;       /* original — primary interactive accent */
+
+    --bg:#faf8f2;          /* near-white, warm paper */
+    --panel:#ffffff;
+    --card:#ffffff;
+    --ink:#1e000e;         /* Coffee Bean — body/heading text, high contrast on white */
+    --sub:#5c6a55;         /* Dusty Olive, darkened for AA-readable secondary text */
+    --line:#e7e1d1;        /* soft neutral border derived from the warm palette */
+
+    --accent:#ff6f59;      /* Vibrant Coral — buttons, active states, links */
+    --accent2:#b9791c;     /* Apricot Cream, darkened for readable heading-adjacent accents */
+    --good:#1f9d6f;        /* Aquamarine, darkened for readable "archived/done" state */
+    --bad:#c9432f;         /* Vibrant Coral, darkened for "external/blocked" state text */
+    --on-accent:#1e000e;   /* dark text sits on top of the light-toned accent fills */
+
+    --font-head:"Libertinus Math", Georgia, "Times New Roman", serif;
+    --font-body:"Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:var(--font-body);
+    background:var(--bg); color:var(--ink); height:100vh; overflow:hidden;
+  }
+  .app{ display:flex; flex-direction:column; height:100vh; }
+  header{
+    padding:14px 20px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  h1{ font-family:var(--font-head); font-size:20px; margin:0; font-weight:700; letter-spacing:.2px; white-space:nowrap; color:var(--accent2);}
+  h1 span{ color:var(--sub); font-weight:400; font-size:12px; font-family:var(--font-body); }
+  .tabs{ display:flex; gap:4px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:3px; }
+  .tab{ padding:6px 14px; border-radius:8px; cursor:pointer; font-size:13px; color:var(--sub); user-select:none;}
+  .tab.active{ background:var(--accent); color:var(--on-accent); font-weight:700;}
+  .search{ flex:1; min-width:160px; }
+  .search input{
+    width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--line);
+    background:var(--card); color:var(--ink); font-size:13px; outline:none; font-family:var(--font-body);
+  }
+  .search input:focus{ border-color:var(--accent); }
+  .stat{ font-size:12px; color:var(--sub); white-space:nowrap; }
+  .stat b{ color:var(--good); }
+  .syncbar{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--sub); white-space:nowrap; }
+  .syncdot{ width:7px; height:7px; border-radius:50%; background:var(--line); display:inline-block; }
+  .syncdot.live{ background:var(--good); }
+  .syncdot.err{ background:var(--bad); }
+  .iconbtn{
+    border:1px solid var(--line); background:var(--card); color:var(--sub); border-radius:8px;
+    width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px;
+  }
+  .iconbtn:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .filters{
+    padding:8px 20px; border-bottom:1px solid var(--line); display:flex; gap:8px; flex-wrap:wrap;
+    align-items:center; font-size:12px; position:relative;
+  }
+  .filterbtn{
+    display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:100px; border:1px solid var(--line);
+    background:var(--card); color:var(--sub); font-size:12px; cursor:pointer; user-select:none; white-space:nowrap;
+  }
+  .filterbtn:hover{ border-color:var(--accent); }
+  .filterbtn.active{ border-color:var(--accent); color:var(--ink); background:rgba(255,111,89,.08); }
+  .filterbtn .n{ background:var(--accent); color:var(--on-accent); font-weight:700; font-size:10px; padding:1px 6px; border-radius:100px; }
+  .filterbtn .caret{ font-size:9px; opacity:.6; }
+  .filterpop{
+    position:absolute; top:100%; margin-top:6px; background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:10px; box-shadow:0 12px 30px rgba(30,0,14,.15); z-index:40; min-width:200px; max-width:280px;
+    max-height:280px; overflow-y:auto; display:none;
+  }
+  .filterpop.open{ display:block; }
+  .filterpop label{ display:flex; align-items:center; gap:7px; font-size:12px; padding:5px 4px; border-radius:6px; cursor:pointer; }
+  .filterpop label:hover{ background:var(--bg); }
+  .filterpop .popfoot{ display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px solid var(--line); }
+  .filterpop .popfoot span{ font-size:11px; color:var(--accent); cursor:pointer; }
+  .chips{ display:flex; flex-wrap:wrap; gap:5px; max-width:520px; }
+  .chip{
+    padding:3px 9px; border-radius:100px; border:1px solid var(--line); cursor:pointer;
+    background:var(--card); color:var(--sub); font-size:11.5px; white-space:nowrap;
+  }
+  .chip.on{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:700;}
+  .clearbtn{ align-self:flex-start; margin-top:14px; font-size:11.5px; color:var(--accent); cursor:pointer; text-decoration:underline; }
+
+  main{ flex:1; overflow:hidden; position:relative; }
+  .view{ display:none; height:100%; overflow:auto; flex-direction:column; }
+  .view.active{ display:flex; }
+  #view-library.active, #view-table.active, #view-biblio.active{ display:block; }
+
+  /* ---- Mindmap view ---- */
+  .mmToolbar{
+    display:flex; align-items:center; gap:14px; padding:8px 20px; border-bottom:1px solid var(--line);
+    flex-shrink:0; flex-wrap:wrap;
+  }
+  .mmZoom{ display:flex; gap:4px; }
+  .mmLegend{ display:flex; gap:12px; flex-wrap:wrap; margin-left:auto; font-size:11px; color:var(--sub); }
+  .mmLegend .li{ display:flex; align-items:center; gap:5px; }
+  .mmLegend .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+  #mindmap-wrap{ display:flex; flex:1; min-height:0; position:relative; }
+  #svgHost{ flex:1; overflow:hidden; cursor:grab; position:relative; }
+  #svgHost.grabbing{ cursor:grabbing; }
+  #svgHost svg{ display:block; }
+  .mmtooltip{
+    position:absolute; pointer-events:none; background:var(--coffee); color:#fff; padding:8px 11px; border-radius:8px;
+    font-size:11.5px; line-height:1.5; max-width:260px; box-shadow:0 8px 22px rgba(30,0,14,.3); z-index:30;
+    font-family:var(--font-body);
+  }
+  .mmtooltip.hidden{ display:none; }
+  .mmtooltip b{ display:block; font-family:var(--font-head); font-size:12.5px; margin-bottom:2px; }
+  .mmtooltip .sm{ opacity:.75; font-size:10.5px; }
+  #detail{
+    width:380px; border-left:1px solid var(--line); padding:18px; overflow-y:auto; background:var(--panel); flex-shrink:0;
+  }
+  #detail h2{ font-family:var(--font-head); font-weight:700; font-size:18px; margin:0 0 4px; color:var(--accent2); }
+  #detail .empty{ color:var(--sub); font-size:13px; margin-top:40px; text-align:center; }
+  .node circle{ cursor:pointer; transition:r .15s, opacity .15s; }
+  .node text{ font-size:11px; fill:var(--ink); cursor:pointer; font-family:var(--font-body); paint-order:stroke; stroke:var(--bg); stroke-width:3px; }
+  .node.dim{ opacity:.15; }
+  .node.section circle{ fill:var(--dusty); opacity:.9; stroke:var(--line); stroke-width:1; }
+  .node.section.unsorted circle{ fill:var(--bad); }
+  .node.hub circle{ stroke:var(--line); stroke-width:1.5; }
+  .node.entry circle{ fill:var(--sub); opacity:.55;}
+  .node.entry.match circle{ fill:var(--good); opacity:1; }
+  .node.entry.review circle{ fill:var(--bad); opacity:.9; }
+  .node.root circle{ fill:var(--coral); }
+  .link{ stroke:rgba(30,0,14,.16); stroke-width:1.2; fill:none; transition:opacity .15s, stroke .15s; }
+  .link.dim{ opacity:.08; }
+  .link.hi{ stroke:var(--accent); stroke-width:2; opacity:1; }
+
+  /* ---- Library (wiki) view ---- */
+  #library{ padding:18px 20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; align-content:start; }
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .card .title{ font-family:var(--font-head); font-size:15px; font-weight:700; line-height:1.35; color:var(--ink); }
+  .card .meta{ font-size:11.5px; color:var(--sub); }
+  .card .note{ font-size:12px; color:var(--ink); opacity:.85; line-height:1.4; }
+  .tagrow{ display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+  .tag{ font-size:10px; padding:2px 7px; border-radius:100px; background:rgba(120,132,117,.25); color:var(--dusty); }
+  .tag.geo{ background:rgba(247,208,138,.2); color:var(--accent2); }
+  .cardfoot{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:8px; flex-wrap:wrap; }
+  .openbtn{ font-size:11.5px; padding:5px 10px; border-radius:7px; background:var(--accent); color:var(--on-accent); text-decoration:none; font-weight:700; border:none; cursor:pointer; font-family:var(--font-body); }
+  .openbtn.ext{ background:transparent; border:1px solid var(--line); color:var(--ink); }
+  .newtab-mini{ font-size:14px; color:var(--sub); text-decoration:none; padding:4px 6px; }
+  .newtab-mini:hover{ color:var(--accent); }
+  select.status{
+    font-size:11px; padding:4px 6px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font-family:var(--font-body);
+  }
+  .badge{ font-size:9.5px; padding:2px 6px; border-radius:5px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; }
+  .badge.done{ background:rgba(165,255,214,.18); color:var(--good); }
+  .badge.pdf{ background:rgba(247,208,138,.2); color:var(--accent2); }
+  .badge.ext{ background:rgba(255,111,89,.18); color:var(--bad); }
+  .badge.review{ background:rgba(255,111,89,.25); color:var(--bad); }
+
+  /* ---- Table view ---- */
+  #tablewrap{ padding:16px 20px; }
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  th{ text-align:left; color:var(--accent2); font-weight:700; font-family:var(--font-head); padding:8px 10px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--bg); cursor:pointer; }
+  td{ padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:hover td{ background:rgba(120,132,117,.08); }
+  td.t-title{ max-width:280px; }
+  td a{ color:var(--accent); font-weight:700; cursor:pointer; }
+
+  /* ---- Bibliography view ---- */
+  .biblio-actions{ padding:14px 20px; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .biblio-actions .hint{ font-size:11.5px; color:var(--sub); }
+  #biblioContent{ padding:10px 24px 60px; font-size:13.5px; line-height:1.8; max-width:900px; }
+  #biblioContent h3{ font-family:var(--font-head); font-weight:700; color:var(--accent2); font-size:16px; margin:26px 0 10px; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  #biblioContent p{ margin:0 0 10px; padding-left:26px; text-indent:-26px; }
+  #biblioContent p .rev{ color:var(--bad); font-weight:700; font-size:10.5px; text-transform:uppercase; margin-left:6px; }
+
+  /* ---- Modal viewer ---- */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(30,0,14,.55); display:flex; align-items:center; justify-content:center; z-index:80; }
+  .modal-overlay.hidden{ display:none; }
+  .modal-box{ background:var(--panel); width:min(1150px,94vw); height:min(88vh,920px); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 70px rgba(30,0,14,.4); }
+  .modal-head{ display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid var(--line); gap:12px; }
+  .modal-head .mtitle{ font-family:var(--font-head); font-weight:700; font-size:14.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .modal-head .acts{ display:flex; gap:6px; align-items:center; flex-shrink:0; }
+  .modal-frame{ flex:1; border:0; width:100%; background:#fff; }
+  .modal-fallback{ padding:24px; font-size:13px; color:var(--sub); }
+
+  /* ---- Settings panel ---- */
+  .settings-box{ background:var(--panel); width:min(480px,92vw); border-radius:12px; padding:20px; box-shadow:0 24px 70px rgba(30,0,14,.4); }
+  .settings-box h3{ font-family:var(--font-head); margin:0 0 4px; font-size:17px; }
+  .settings-box .sub{ font-size:12px; color:var(--sub); margin-bottom:16px; }
+  .settings-box label{ font-size:11.5px; color:var(--sub); display:block; margin:12px 0 4px; text-transform:uppercase; letter-spacing:.5px; }
+  .settings-box input{ width:100%; padding:8px 10px; border-radius:7px; border:1px solid var(--line); font-size:13px; font-family:var(--font-body); }
+  .settings-box .row{ display:flex; gap:8px; margin-top:18px; }
+  .settings-box .status{ font-size:11.5px; margin-top:10px; color:var(--sub); }
+
+  ::-webkit-scrollbar{ width:9px; height:9px; }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>🧠 Classroom Catalytics Library <span id="countline"></span></h1>
+    <div class="tabs">
+      <div class="tab active" data-view="mindmap">Mind Map</div>
+      <div class="tab" data-view="library">Wiki / Library</div>
+      <div class="tab" data-view="table">Lit-Review Table</div>
+      <div class="tab" data-view="biblio">Bibliography</div>
+    </div>
+    <div class="search"><input id="search" placeholder="Search title, author, note…"></div>
+    <div class="stat"><b id="matchcount">0</b> / <span id="totalcount">0</span> sources</div>
+    <div class="syncbar"><span class="syncdot" id="syncDot"></span><span id="syncLabel">Not connected</span></div>
+    <div class="iconbtn" id="driveBtn" title="Open the Drive folder">📁</div>
+    <div class="iconbtn" id="syncBtn" title="Just added files to Drive? Click to sync — it also checks automatically every couple of minutes and whenever you switch back to this tab.">🔄</div>
+  </header>
+
+  <div class="filters" id="filterBar"></div>
+
+  <main>
+    <div class="view active" id="view-mindmap">
+      <div class="mmToolbar">
+        <div class="tabs" id="mmModeTabs">
+          <div class="tab active" data-mode="radial">🌳 Radial Map</div>
+          <div class="tab" data-mode="network">🕸 Concept Network</div>
+        </div>
+        <div class="mmZoom">
+          <div class="iconbtn" id="mmZoomOut" title="Zoom out">−</div>
+          <div class="iconbtn" id="mmZoomReset" title="Reset view">⤢</div>
+          <div class="iconbtn" id="mmZoomIn" title="Zoom in">+</div>
+        </div>
+        <div class="mmLegend" id="mmLegend"></div>
+      </div>
+      <div id="mindmap-wrap">
+        <div id="svgHost"></div>
+        <div id="mmTooltip" class="mmtooltip hidden"></div>
+        <div id="detail"><div class="empty">Click a node to see details here.<br><br><b>Radial Map:</b> inner ring = bibliography sections (red = needs review), outer dots = sources.<br><br><b>Concept Network:</b> large hubs = constructs (e.g. burnout, morale), small dots = sources linked to whichever construct(s) they cover.<br><br>Scroll to zoom, drag to pan, hover any node for a quick preview.</div></div>
+      </div>
+    </div>
+    <div class="view" id="view-library"><div id="library"></div></div>
+    <div class="view" id="view-table">
+      <div id="tablewrap">
+        <table id="datatable">
+          <thead><tr>
+            <th data-k="year">Year</th><th data-k="authors">Authors</th><th data-k="title">Title</th>
+            <th data-k="section_name">Section</th><th data-k="geography">Geography</th>
+            <th data-k="method">Method</th><th data-k="construct">Construct</th><th data-k="access_type">Access</th><th>Link</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="view" id="view-biblio">
+      <div class="biblio-actions">
+        <button class="openbtn" id="dlMd">⬇ Download as Markdown (.md)</button>
+        <button class="openbtn ext" id="dlDoc">⬇ Download as Word (.doc)</button>
+        <span class="hint">Regenerates from whatever is currently filtered/synced — clear filters first for the full bibliography.</span>
+      </div>
+      <div id="biblioContent"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Viewer modal -->
+<div class="modal-overlay hidden" id="viewerModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="mtitle" id="modalTitle">—</div>
+      <div class="acts">
+        <a class="openbtn ext" id="modalNewTab" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
+        <div class="iconbtn" id="modalClose">✕</div>
+      </div>
+    </div>
+    <iframe class="modal-frame" id="modalFrame"></iframe>
+  </div>
+</div>
+
+<script src="data/data.js"></script>
+<script>
+/* ===================== CONFIG & STORAGE ===================== */
+// Fixed, not user-editable or visible in any UI — visitors never see or touch these.
+const DRIVE_FOLDER_ID = "1R6PlK0nFmdtMqIqYpRg28wi1r3ageNux";
+const DRIVE_API_KEY = "AIzaSyBWR8Bk_PZ5Xz8XwUX-R-xlrxP8SFQnJjk"; // read-only, restricted to Drive API
+
+const STUDY_KEY = "ccl_study_status_v1";
+const OVERRIDE_KEY = "ccl_tag_overrides_v1";
+function loadStudy(){ try{return JSON.parse(localStorage.getItem(STUDY_KEY)||"{}");}catch(e){return {};} }
+function saveStudy(obj){ localStorage.setItem(STUDY_KEY, JSON.stringify(obj)); }
+function loadOverrides(){ try{return JSON.parse(localStorage.getItem(OVERRIDE_KEY)||"{}");}catch(e){return {};} }
+function saveOverrides(obj){ localStorage.setItem(OVERRIDE_KEY, JSON.stringify(obj)); }
+let studyStatus = loadStudy();
+
+const BASE_SOURCES = (typeof SOURCES !== "undefined") ? SOURCES : [];
+let LIVE_SOURCES = BASE_SOURCES.slice();
+
+const LABELS = {
+  theme:{motivation:"Motivation",demotivation:"Demotivation",behaviour:"Behaviour",attrition:"Attrition",theory:"Theory",unsorted:"Unsorted"},
+  geography:{India:"India",UP:"Uttar Pradesh",US_UK_Europe:"US/UK/Europe",other:"Other LMIC",global:"Global",unsorted:"Unclassified"},
+  method:{RCT:"RCT",quasi_experimental:"Quasi-Experimental",survey:"Survey",qualitative:"Qualitative",theory:"Theory",review_meta:"Review/Meta-analysis",unsorted:"Unclassified"},
+  construct:{motivation:"Motivation",demotivation:"Demotivation",morale:"Morale",burnout:"Burnout",job_satisfaction:"Job Satisfaction",engagement:"Engagement",agency:"Agency",efficacy:"Self-Efficacy",identity:"Identity",absenteeism:"Absenteeism",unsorted:"Unclassified"},
+  access_type:{open_pdf:"Open PDF",paywalled:"Paywalled",book:"Book",researchgate:"ResearchGate",external_page:"External Page",markdown_note:"Note / Citation Only",other:"Other File"}
+};
+
+/* ===================== SMART AUTO-CLASSIFIER ===================== */
+/* Keyword → tag rules, generic enough to cover future studies beyond teacher motivation. */
+const KEYWORD_RULES = {
+  construct: [
+    [/burn ?out/i,"burnout"],[/morale/i,"morale"],[/job satisfaction|satisfaction/i,"job_satisfaction"],
+    [/self.?efficacy|efficacy/i,"efficacy"],[/identity/i,"identity"],[/absent/i,"absenteeism"],
+    [/engagement/i,"engagement"],[/agency/i,"agency"],[/demotivat/i,"demotivation"],[/motivat/i,"motivation"]
+  ],
+  method: [
+    [/randomi[sz]ed|\brct\b/i,"RCT"],[/quasi.?experiment/i,"quasi_experimental"],
+    [/systematic review|meta.?analysis|review of/i,"review_meta"],[/survey|questionnaire/i,"survey"],
+    [/qualitative|interview|case stud(y|ies)|ethnograph/i,"qualitative"],[/theory|theoretical|framework/i,"theory"]
+  ],
+  geography: [
+    [/uttar pradesh|\bup\b/i,"UP"],[/india/i,"India"],
+    [/u\.?s\.?a?\.?\b|united states|u\.?k\.?\b|united kingdom|europe/i,"US_UK_Europe"],
+    [/africa|ghana|kenya|tanzania|nepal|bangladesh|pakistan|lmic|developing countr/i,"other"]
+  ],
+  theme: [
+    [/attrition|turnover|quit|leav(e|ing)/i,"attrition"],[/demotivat|disengag/i,"demotivation"],
+    [/behaviour|behavior|absente/i,"behaviour"],[/theory|framework|conceptual/i,"theory"],[/motivat/i,"motivation"]
+  ]
+};
+function classify(text){
+  const out = { theme:[], geography:"unsorted", method:"unsorted", construct:"unsorted" };
+  for(const [re,val] of KEYWORD_RULES.theme) if(re.test(text)){ out.theme.push(val); break; }
+  if(!out.theme.length) out.theme.push("unsorted");
+  for(const [re,val] of KEYWORD_RULES.geography) if(re.test(text)){ out.geography=val; break; }
+  for(const [re,val] of KEYWORD_RULES.method) if(re.test(text)){ out.method=val; break; }
+  for(const [re,val] of KEYWORD_RULES.construct) if(re.test(text)){ out.construct=val; break; }
+  return out;
+}
+function titleFromFilename(name){
+  let t = name.replace(/\.(pdf|md|html?)$/i,"");
+  t = t.replace(/^\d+_/,"");
+  t = t.replace(/[_\-]+/g," ").trim();
+  return t.replace(/\b\w/g, c=>c.toUpperCase());
+}
+
+/* ===================== DRIVE SYNC ===================== */
+async function fetchDriveFiles(folderId, apiKey){
+  const fields = "files(id,name,mimeType,webViewLink,webContentLink,modifiedTime,size)";
+  const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=${encodeURIComponent(fields)}&pageSize=1000&key=${apiKey}`;
+  const res = await fetch(url);
+  if(!res.ok){ const t = await res.text(); throw new Error("Drive API "+res.status+": "+t.slice(0,200)); }
+  const data = await res.json();
+  return data.files || [];
+}
+async function fetchDriveText(fileId, apiKey){
+  try{
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`);
+    if(!res.ok) return null;
+    return await res.text();
+  }catch(e){ return null; }
+}
+function parseStubMarkdown(text){
+  const out = {};
+  const link = text.match(/\*\*Link:\*\*\s*(\S+)/);
+  if(link && /^https?:\/\//.test(link[1])) out.url = link[1];
+  const title = text.match(/^#\s+(.+)$/m);
+  if(title) out.title = title[1].trim();
+  const auth = text.match(/\*\*Authors:\*\*\s*(.+)/);
+  if(auth) out.authors = auth[1].trim();
+  const year = text.match(/\*\*Year:\*\*\s*(\d{4})/);
+  if(year) out.year = parseInt(year[1]);
+  const venue = text.match(/\*\*Venue:\*\*\s*(.+)/);
+  if(venue) out.venue = venue[1].trim();
+  const note = text.match(/\*\*Note:\*\*\s*(.+)/);
+  if(note) out.note = note[1].trim();
+  return out;
+}
+const overrides = loadOverrides();
+
+let lastFileSignature = null;
+async function syncFromDrive(silent){
+  const dot = document.getElementById("syncDot"), label = document.getElementById("syncLabel");
+  if(!silent){ dot.className = "syncdot"; label.textContent = "Syncing…"; }
+  try{
+    const files = await fetchDriveFiles(DRIVE_FOLDER_ID, DRIVE_API_KEY);
+    const signature = files.map(f=>f.id+":"+f.name).sort().join("|");
+    if(silent && signature === lastFileSignature){
+      // nothing changed — leave the current render alone, just refresh the timestamp
+      label.textContent = "Live · checked "+new Date().toLocaleTimeString();
+      return;
+    }
+    lastFileSignature = signature;
+    const byIdPrefix = {};
+    files.forEach(f=>{
+      const m = f.name.match(/^(\d+)_/);
+      if(m) byIdPrefix[parseInt(m[1])] = f;
+    });
+
+    const merged = [];
+    for(const base of BASE_SOURCES){
+      const f = byIdPrefix[base.id];
+      const entry = Object.assign({}, base);
+      if(f){
+        entry.drive_id = f.id;
+        entry.drive_view = `https://drive.google.com/file/d/${f.id}/preview`;
+        entry.drive_download = f.webViewLink;
+        if(/pdf$/i.test(f.name)){
+          entry.local_file = null;
+          entry.drive_pdf = true;
+          entry.download_status = "downloaded_pdf";
+        } else if(/\.md$/i.test(f.name)){
+          entry.drive_note = true;
+        }
+      }
+      merged.push(entry);
+    }
+
+    const knownIds = new Set(BASE_SOURCES.map(s=>s.id));
+
+    // handle combined multi-entry markdown archive files (e.g. link_stubs_combined.md)
+    // rather than importing them as one giant phantom "new source", splice their per-id
+    // notes back onto the matching existing entries and skip them from the unmatched loop.
+    const consumedFiles = new Set();
+    for(const f of files){
+      if(!/\.md$/i.test(f.name)) continue;
+      const text = await fetchDriveText(f.id, DRIVE_API_KEY);
+      if(!text) continue;
+      const idBlocks = [...text.matchAll(/^### \[id:(\d+)\]([\s\S]*?)(?=^### \[id:|\n---\n|$)/gm)];
+      if(idBlocks.length < 2) continue; // not a combined-format file, let the normal loop handle it
+      consumedFiles.add(f.name);
+      idBlocks.forEach(([, idStr, block])=>{
+        const id = parseInt(idStr);
+        const target = merged.find(e=>e.id===id);
+        if(!target) return;
+        const parsed = parseStubMarkdown(block);
+        if(parsed.url && !target.url) target.url = parsed.url;
+        target.has_archive_note = true;
+        target.archive_file_id = f.id;
+      });
+    }
+
+    let nextId = Math.max(0, ...BASE_SOURCES.map(s=>s.id)) + 1000;
+    for(const f of files){
+      if(consumedFiles.has(f.name)) continue;
+      const m = f.name.match(/^(\d+)_/);
+      if(m && knownIds.has(parseInt(m[1]))) continue; // already merged above
+      const isMd = /\.md$/i.test(f.name);
+      const isPdf = /pdf$/i.test(f.name);
+      let title = titleFromFilename(f.name), url = "", authors = "", year = null, venue = "", note = "New file detected in Drive folder — auto-classified, please review.";
+      let parsed = {};
+      if(isMd){
+        const text = await fetchDriveText(f.id, DRIVE_API_KEY);
+        if(text) parsed = parseStubMarkdown(text);
+      }
+      title = parsed.title || title;
+      url = parsed.url || "";
+      authors = parsed.authors || "";
+      year = parsed.year || null;
+      venue = parsed.venue || "";
+      note = parsed.note || note;
+      const guess = classify((title+" "+venue+" "+note).toLowerCase());
+      const id = "drive-"+f.id;
+      const ov = overrides[id] || {};
+      merged.push(Object.assign({
+        id, section:0, section_name:"Unsorted / Needs Review",
+        authors, year, title, venue, note,
+        url, theme:guess.theme, geography:guess.geography, method:guess.method, construct:guess.construct,
+        access_type: isPdf ? "open_pdf" : (isMd ? "markdown_note" : "other"),
+        drive_id:f.id, drive_view: isPdf ? `https://drive.google.com/file/d/${f.id}/preview` : null,
+        drive_download:f.webViewLink,
+        download_status: isPdf ? "downloaded_pdf" : (isMd ? "downloaded_html" : "unknown"),
+        local_file:null, needs_review:true
+      }, ov));
+    }
+
+    // apply any manual tag overrides saved locally
+    LIVE_SOURCES = merged.map(e => overrides[e.id] ? Object.assign({}, e, overrides[e.id]) : e);
+
+    dot.className = "syncdot live";
+    label.textContent = "Live · synced "+new Date().toLocaleTimeString();
+    render();
+  }catch(err){
+    dot.className = "syncdot err";
+    label.textContent = "Sync error — using local snapshot";
+    console.error(err);
+    LIVE_SOURCES = BASE_SOURCES.slice();
+    render();
+  }
+}
+
+/* ===================== SYNC BUTTON ===================== */
+document.getElementById("syncBtn").onclick = async ()=>{
+  const btn = document.getElementById("syncBtn");
+  btn.style.transform = "rotate(360deg)";
+  btn.style.transition = "transform .5s";
+  await syncFromDrive(false);
+  setTimeout(()=>{ btn.style.transition="none"; btn.style.transform="none"; }, 550);
+};
+
+/* ===================== VIEWER MODAL ===================== */
+const viewerModal = document.getElementById("viewerModal");
+const modalFrame = document.getElementById("modalFrame");
+const modalTitle = document.getElementById("modalTitle");
+const modalNewTab = document.getElementById("modalNewTab");
+function bestSrc(e){
+  if(e.drive_pdf && e.drive_view) return { src:e.drive_view, ext:e.drive_download||e.url||"#" };
+  if(e.local_file) return { src:e.local_file, ext:e.drive_download||e.url||e.local_file };
+  // no local copy and not a real PDF on Drive (e.g. a landing page) — prefer the
+  // original page itself over Drive's raw-text file preview, which can't render HTML.
+  if(e.url) return { src:e.url, ext:e.url };
+  if(e.drive_view) return { src:e.drive_view, ext:e.drive_download||e.url||"#" };
+  return null;
+}
+function openViewer(e){
+  const s = bestSrc(e);
+  if(!s) return;
+  modalTitle.textContent = e.title;
+  modalFrame.src = s.src;
+  modalNewTab.href = s.ext;
+  viewerModal.classList.remove("hidden");
+}
+document.getElementById("driveBtn").onclick = ()=>{
+  modalTitle.textContent = "Google Drive — source folder";
+  modalFrame.src = `https://drive.google.com/embeddedfolderview?id=${DRIVE_FOLDER_ID}#list`;
+  modalNewTab.href = `https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}`;
+  viewerModal.classList.remove("hidden");
+};
+document.getElementById("modalClose").onclick = ()=>{ viewerModal.classList.add("hidden"); modalFrame.src="about:blank"; };
+viewerModal.onclick = (e)=>{ if(e.target===viewerModal){ viewerModal.classList.add("hidden"); modalFrame.src="about:blank"; } };
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){
+    viewerModal.classList.add("hidden"); modalFrame.src="about:blank";
+  }
+});
+
+/* ===================== FILTER STATE ===================== */
+const state = { theme:new Set(), geography:new Set(), method:new Set(), construct:new Set(), access_type:new Set(), q:"" };
+function themesOf(e){ return e.theme || []; }
+function matches(e){
+  if(state.theme.size && !themesOf(e).some(t=>state.theme.has(t))) return false;
+  if(state.geography.size && !state.geography.has(e.geography)) return false;
+  if(state.method.size && !state.method.has(e.method)) return false;
+  if(state.construct.size && !state.construct.has(e.construct)) return false;
+  if(state.access_type.size && !state.access_type.has(e.access_type)) return false;
+  if(state.q){
+    const hay = (e.title+" "+(e.authors||"")+" "+(e.note||"")+" "+(e.venue||"")).toLowerCase();
+    if(!hay.includes(state.q)) return false;
+  }
+  return true;
+}
+const FILTER_FIELDS = [
+  {key:"theme", label:"Theme"},
+  {key:"geography", label:"Geography"},
+  {key:"method", label:"Method"},
+  {key:"construct", label:"Construct"},
+  {key:"access_type", label:"Access"}
+];
+let openFilterField = null;
+
+function buildFilterBar(){
+  const bar = document.getElementById("filterBar");
+  bar.innerHTML = "";
+  FILTER_FIELDS.forEach(({key,label})=>{
+    const vals = [...new Set(LIVE_SOURCES.map(s=>Array.isArray(s[key])?s[key]:[s[key]]).flat().filter(Boolean))].sort();
+    const wrap = document.createElement("div");
+    wrap.style.position = "relative";
+
+    const btn = document.createElement("div");
+    const n = state[key].size;
+    btn.className = "filterbtn" + (n?" active":"");
+    btn.innerHTML = `${label}${n?` <span class="n">${n}</span>`:""} <span class="caret">▾</span>`;
+    btn.onclick = (ev)=>{
+      ev.stopPropagation();
+      openFilterField = (openFilterField===key) ? null : key;
+      renderFilterPopStates();
+    };
+    wrap.appendChild(btn);
+
+    const pop = document.createElement("div");
+    pop.className = "filterpop" + (openFilterField===key ? " open":"");
+    pop.dataset.field = key;
+    pop.onclick = (ev)=>ev.stopPropagation();
+    vals.forEach(v=>{
+      const lbl = document.createElement("label");
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = state[key].has(v);
+      cb.onchange = ()=>{
+        if(cb.checked) state[key].add(v); else state[key].delete(v);
+        render();
+      };
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode((LABELS[key]&&LABELS[key][v])||v));
+      pop.appendChild(lbl);
+    });
+    const foot = document.createElement("div");
+    foot.className = "popfoot";
+    const clearSpan = document.createElement("span");
+    clearSpan.textContent = "clear";
+    clearSpan.onclick = ()=>{ state[key].clear(); render(); };
+    const doneSpan = document.createElement("span");
+    doneSpan.textContent = "done";
+    doneSpan.onclick = ()=>{ openFilterField = null; renderFilterPopStates(); };
+    foot.appendChild(clearSpan); foot.appendChild(doneSpan);
+    pop.appendChild(foot);
+    wrap.appendChild(pop);
+
+    bar.appendChild(wrap);
+  });
+
+  const anyActive = FILTER_FIELDS.some(f=>state[f.key].size) || state.q;
+  if(anyActive){
+    const clearAll = document.createElement("div");
+    clearAll.className = "clearbtn";
+    clearAll.id = "clearFilters";
+    clearAll.textContent = "clear all filters";
+    clearAll.onclick = ()=>{
+      FILTER_FIELDS.forEach(f=>state[f.key].clear());
+      document.getElementById("search").value="";
+      state.q="";
+      render();
+    };
+    bar.appendChild(clearAll);
+  }
+}
+function renderFilterPopStates(){
+  document.querySelectorAll(".filterpop").forEach(p=>{
+    p.classList.toggle("open", p.dataset.field===openFilterField);
+  });
+}
+document.addEventListener("click", ()=>{
+  if(openFilterField){ openFilterField=null; renderFilterPopStates(); }
+});
+
+document.getElementById("search").oninput = (e)=>{ state.q = e.target.value.toLowerCase(); render(); };
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById("view-"+t.dataset.view).classList.add("active");
+  };
+});
+
+function linkFor(e){
+  const s = bestSrc(e);
+  if(!s) return null;
+  const isExternal = !e.local_file && !e.drive_pdf;
+  return { href:s.src, ext_href:s.ext, ext:isExternal };
+}
+
+/* ===================== RENDER: LIBRARY ===================== */
+function renderLibrary(list){
+  const host = document.getElementById("library");
+  host.innerHTML = "";
+  list.forEach(e=>{
+    const card = document.createElement("div");
+    card.className = "card";
+    const link = linkFor(e);
+    let badge;
+    if(e.needs_review) badge = '<span class="badge review">Needs Review</span>';
+    else if(e.drive_pdf || e.local_file) badge = '<span class="badge pdf">Archived</span>';
+    else if(e.access_type==='book'||e.access_type==='paywalled') badge = '<span class="badge ext">External Only</span>';
+    else badge = '<span class="badge done">Catalogued</span>';
+    card.innerHTML = `
+      <div class="title">${e.title}</div>
+      <div class="meta">${e.authors||"—"} ${e.year?("· "+e.year):""} · <i>${e.venue||""}</i></div>
+      <div class="note">${e.note||""}</div>
+      <div class="tagrow">
+        ${themesOf(e).map(t=>`<span class="tag">${(LABELS.theme[t]||t)}</span>`).join("")}
+        <span class="tag geo">${LABELS.geography[e.geography]||e.geography}</span>
+        <span class="tag">${LABELS.method[e.method]||e.method}</span>
+        <span class="tag">${LABELS.construct[e.construct]||e.construct}</span>
+      </div>
+      <div class="cardfoot">
+        <div>${badge}</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <select class="status" data-id="${e.id}">
+            <option value="unread">Unread</option>
+            <option value="reading">Reading</option>
+            <option value="studied">Studied</option>
+          </select>
+          ${link ? `<button class="openbtn">Open</button><a class="newtab-mini" href="${link.ext_href}" target="_blank" title="Open in new tab">↗</a>` : ""}
+        </div>
+      </div>
+    `;
+    const sel = card.querySelector("select.status");
+    sel.value = studyStatus[e.id] || "unread";
+    sel.onchange = ()=>{ studyStatus[e.id]=sel.value; saveStudy(studyStatus); };
+    const openBtn = card.querySelector(".openbtn");
+    if(openBtn) openBtn.onclick = ()=> openViewer(e);
+    host.appendChild(card);
+  });
+}
+
+/* ===================== RENDER: TABLE ===================== */
+function renderTable(list){
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  list.forEach(e=>{
+    const link = linkFor(e);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${e.year||"—"}</td>
+      <td>${e.authors||"—"}</td>
+      <td class="t-title">${e.title}${e.needs_review?' <span class="badge review">New</span>':''}</td>
+      <td>${e.section_name}</td>
+      <td>${LABELS.geography[e.geography]||e.geography}</td>
+      <td>${LABELS.method[e.method]||e.method}</td>
+      <td>${LABELS.construct[e.construct]||e.construct}</td>
+      <td>${LABELS.access_type[e.access_type]||e.access_type}</td>
+      <td>${link?`<a data-open="1">open</a> · <a href="${link.ext_href}" target="_blank">↗</a>`:"—"}</td>
+    `;
+    if(link) tr.querySelector('a[data-open]').onclick = ()=> openViewer(e);
+    tbody.appendChild(tr);
+  });
+}
+
+/* ===================== ZOOM / PAN CONTROLLER ===================== */
+const NS = "http://www.w3.org/2000/svg";
+let mmMode = "radial";
+let zoomState = { scale:1, tx:0, ty:0 };
+const dragState = { active:false, lastX:0, lastY:0, zoomGroup:null, host:null };
+function attachZoomPan(svg, zoomGroup, host){
+  function apply(){ zoomGroup.setAttribute("transform", `translate(${zoomState.tx},${zoomState.ty}) scale(${zoomState.scale})`); }
+  apply();
+  host.onwheel = (ev)=>{
+    ev.preventDefault();
+    const rect = host.getBoundingClientRect();
+    const mx = ev.clientX-rect.left, my = ev.clientY-rect.top;
+    const factor = ev.deltaY<0 ? 1.12 : 1/1.12;
+    const newScale = Math.min(4, Math.max(0.2, zoomState.scale*factor));
+    zoomState.tx = mx - (mx-zoomState.tx)*(newScale/zoomState.scale);
+    zoomState.ty = my - (my-zoomState.ty)*(newScale/zoomState.scale);
+    zoomState.scale = newScale;
+    apply();
+  };
+  host.onmousedown = (ev)=>{
+    dragState.active = true; dragState.lastX = ev.clientX; dragState.lastY = ev.clientY;
+    dragState.zoomGroup = zoomGroup; dragState.host = host;
+    host.classList.add("grabbing");
+  };
+  host._mmApplyZoom = apply;
+}
+// attached once — reads current drag target from dragState so re-renders never stack listeners
+window.addEventListener("mousemove", (ev)=>{
+  if(!dragState.active) return;
+  zoomState.tx += ev.clientX-dragState.lastX; zoomState.ty += ev.clientY-dragState.lastY;
+  dragState.lastX = ev.clientX; dragState.lastY = ev.clientY;
+  dragState.zoomGroup.setAttribute("transform", `translate(${zoomState.tx},${zoomState.ty}) scale(${zoomState.scale})`);
+});
+window.addEventListener("mouseup", ()=>{
+  dragState.active = false;
+  if(dragState.host) dragState.host.classList.remove("grabbing");
+});
+function resetZoom(){
+  zoomState = { scale:1, tx:0, ty:0 };
+  const host = document.getElementById("svgHost");
+  if(host && host._mmApplyZoom) host._mmApplyZoom();
+}
+document.getElementById("mmZoomIn").onclick = ()=>{ zoomState.scale = Math.min(4, zoomState.scale*1.25); document.getElementById("svgHost")._mmApplyZoom(); };
+document.getElementById("mmZoomOut").onclick = ()=>{ zoomState.scale = Math.max(0.2, zoomState.scale/1.25); document.getElementById("svgHost")._mmApplyZoom(); };
+document.getElementById("mmZoomReset").onclick = resetZoom;
+document.querySelectorAll("#mmModeTabs .tab").forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll("#mmModeTabs .tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    mmMode = t.dataset.mode;
+    resetZoom();
+    render();
+  };
+});
+
+/* ===================== TOOLTIP ===================== */
+const tooltip = document.getElementById("mmTooltip");
+function showTooltip(ev, html){
+  tooltip.innerHTML = html;
+  tooltip.classList.remove("hidden");
+  moveTooltip(ev);
+}
+function moveTooltip(ev){
+  const wrap = document.getElementById("mindmap-wrap").getBoundingClientRect();
+  let x = ev.clientX - wrap.left + 16, y = ev.clientY - wrap.top + 16;
+  if(x + 270 > wrap.width) x = ev.clientX - wrap.left - 280;
+  tooltip.style.left = x+"px"; tooltip.style.top = y+"px";
+}
+function hideTooltip(){ tooltip.classList.add("hidden"); }
+
+function renderLegend(mode){
+  const el = document.getElementById("mmLegend");
+  if(mode==="radial"){
+    el.innerHTML = `
+      <span class="li"><span class="dot" style="background:var(--coral)"></span>Library root</span>
+      <span class="li"><span class="dot" style="background:var(--dusty)"></span>Section</span>
+      <span class="li"><span class="dot" style="background:var(--sub)"></span>Source</span>
+      <span class="li"><span class="dot" style="background:var(--good)"></span>Matches filter</span>
+      <span class="li"><span class="dot" style="background:var(--bad)"></span>Needs review</span>`;
+  } else {
+    el.innerHTML = `
+      <span class="li"><span class="dot" style="background:var(--accent2)"></span>Construct hub</span>
+      <span class="li"><span class="dot" style="background:var(--sub)"></span>Source</span>
+      <span class="li"><span class="dot" style="background:var(--good)"></span>Matches filter</span>
+      <span class="li"><span class="dot" style="background:var(--bad)"></span>Needs review</span>`;
+  }
+}
+
+/* ===================== RENDER: MIND MAP (radial tree) ===================== */
+function renderMindmap(list){
+  const matchIds = new Set(list.map(e=>e.id));
+  const sections = [...new Map(LIVE_SOURCES.map(s=>[s.section, s.section_name])).entries()].sort((a,b)=>a[0]-b[0]);
+  const W = 1500, H = 1500, cx=W/2, cy=H/2, R1=170;
+  const svg = document.createElementNS(NS,"svg");
+  svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const zoomGroup = document.createElementNS(NS,"g");
+  zoomGroup.setAttribute("class","zoomGroup");
+  svg.appendChild(zoomGroup);
+
+  const linkEls = {}; // childId -> path el (for highlight)
+  const nodeEls = {}; // id -> group el (for focus-dim)
+  function addLink(id, x1,y1,x2,y2){
+    const p = document.createElementNS(NS,"path");
+    p.setAttribute("class","link");
+    p.setAttribute("d",`M${x1},${y1} L${x2},${y2}`);
+    zoomGroup.appendChild(p);
+    linkEls[id] = p;
+    return p;
+  }
+  function focusChain(chain){
+    const keep = new Set(chain);
+    Object.entries(nodeEls).forEach(([id,el])=>{ el.classList.toggle("dim", !keep.has(id)); });
+  }
+  function clearFocus(){
+    Object.values(nodeEls).forEach(el=>el.classList.remove("dim"));
+  }
+  function addNode(id, x,y,r,cls,label,onclick,hoverHtml,linkChain){
+    const g = document.createElementNS(NS,"g");
+    g.setAttribute("class","node "+cls);
+    g.setAttribute("transform",`translate(${x},${y})`);
+    const c = document.createElementNS(NS,"circle");
+    c.setAttribute("r", r);
+    g.appendChild(c);
+    if(label){
+      const t = document.createElementNS(NS,"text");
+      t.setAttribute("x", r+4); t.setAttribute("y", 3);
+      t.textContent = label;
+      g.appendChild(t);
+    }
+    if(onclick) g.addEventListener("click", onclick);
+    if(hoverHtml){
+      g.addEventListener("mouseenter", (ev)=>{
+        showTooltip(ev, hoverHtml);
+        if(linkChain){
+          linkChain.forEach(lid=>{ if(linkEls[lid]) linkEls[lid].classList.add("hi"); });
+          focusChain(["root", ...linkChain]);
+        }
+      });
+      g.addEventListener("mousemove", moveTooltip);
+      g.addEventListener("mouseleave", ()=>{
+        hideTooltip();
+        if(linkChain) linkChain.forEach(lid=>{ if(linkEls[lid]) linkEls[lid].classList.remove("hi"); });
+        clearFocus();
+      });
+    }
+    zoomGroup.appendChild(g);
+    nodeEls[id] = g;
+    return g;
+  }
+
+  addNode("root", cx,cy,14,"root","Classroom Catalytics", null, "<b>Classroom Catalytics Library</b><span class='sm'>"+LIVE_SOURCES.length+" sources total</span>");
+
+  const angleStep = (2*Math.PI)/sections.length;
+  sections.forEach(([secId, secName], i)=>{
+    const a = i*angleStep - Math.PI/2;
+    const sx = cx + R1*Math.cos(a), sy = cy + R1*Math.sin(a);
+    addLink("sec"+secId, cx,cy,sx,sy);
+    const entries = LIVE_SOURCES.filter(s=>s.section===secId);
+    const short = secName.length>28 ? secName.slice(0,26)+"…" : secName;
+    const secCls = secId===0 ? "section unsorted" : "section";
+    addNode("sec"+secId, sx,sy,9,secCls, (secId===0?"⚑ ":(i+1)+". ")+short,
+      ()=>showDetail({type:"section", id:secId, name:secName, entries}),
+      `<b>${secName}</b><span class="sm">${entries.length} sources — click for list</span>`,
+      ["sec"+secId]);
+
+    const spread = Math.min(0.9, entries.length*0.14);
+    entries.forEach((e,j)=>{
+      const ea = a - spread/2 + (entries.length>1 ? (spread*(j/(entries.length-1))) : 0);
+      const r2 = R1 + 55 + (j%3)*14;
+      const ex = cx + r2*Math.cos(ea), ey = cy + r2*Math.sin(ea);
+      const linkId = "e"+e.id;
+      addLink(linkId, sx,sy,ex,ey);
+      const isMatch = matchIds.has(e.id);
+      const cls = "entry"+(isMatch?" match":"")+(e.needs_review?" review":"");
+      addNode(linkId, ex,ey, isMatch||e.needs_review?4.5:3, cls, null,
+        ()=>showDetail({type:"entry", entry:e}),
+        `<b>${e.title.length>70?e.title.slice(0,68)+"…":e.title}</b><span class="sm">${e.authors||"—"} ${e.year?("· "+e.year):""}</span>`,
+        ["sec"+secId, linkId]);
+    });
+  });
+
+  const host = document.getElementById("svgHost");
+  host.innerHTML = "";
+  host.appendChild(svg);
+  attachZoomPan(svg, zoomGroup, host);
+  renderLegend("radial");
+}
+
+/* ===================== RENDER: CONCEPT NETWORK (force-directed bipartite) ===================== */
+function renderNetwork(list){
+  const matchIds = new Set(list.map(e=>e.id));
+  const sources = LIVE_SOURCES;
+  const hubKeys = [...new Set(sources.map(s=>s.construct).filter(c=>c && c!=="unsorted"))];
+
+  const W = 1500, H = 1500;
+  const nodes = [];
+  const nodeIndex = {};
+  function addN(id, type, extra){
+    const n = Object.assign({ id, type, x: W/2 + (Math.random()-0.5)*100, y: H/2 + (Math.random()-0.5)*100, vx:0, vy:0 }, extra);
+    nodes.push(n); nodeIndex[id] = n; return n;
+  }
+  hubKeys.forEach(k=>{
+    const count = sources.filter(s=>s.construct===k).length;
+    addN("hub:"+k, "hub", { label: LABELS.construct[k]||k, r: 10+Math.min(18,count*0.9), construct:k });
+  });
+  sources.forEach(e=>{
+    addN("src:"+e.id, "source", {
+      r: matchIds.has(e.id)||e.needs_review ? 5.5 : 3.5,
+      entry:e, match: matchIds.has(e.id)
+    });
+  });
+  const edges = [];
+  sources.forEach(e=>{
+    if(e.construct && e.construct!=="unsorted" && nodeIndex["hub:"+e.construct]){
+      edges.push([nodeIndex["src:"+e.id], nodeIndex["hub:"+e.construct]]);
+    }
+  });
+
+  // simple force simulation: hub-charge repulsion + spring edges + centering
+  const cx=W/2, cy=H/2;
+  for(let iter=0; iter<180; iter++){
+    // repulsion between all nodes (cheap approx: only among hubs + sample for perf)
+    for(let i=0;i<nodes.length;i++){
+      const a = nodes[i];
+      for(let j=i+1;j<nodes.length;j++){
+        const b = nodes[j];
+        let dx=a.x-b.x, dy=a.y-b.y;
+        let dist2 = dx*dx+dy*dy;
+        if(dist2<1) dist2=1;
+        if(dist2 > 220*220) continue;
+        const dist = Math.sqrt(dist2);
+        const force = (a.type==="hub"||b.type==="hub" ? 900 : 200) / dist2;
+        const fx = dx/dist*force, fy = dy/dist*force;
+        a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
+      }
+    }
+    // spring edges
+    edges.forEach(([a,b])=>{
+      const dx=b.x-a.x, dy=b.y-a.y;
+      const dist = Math.max(1, Math.sqrt(dx*dx+dy*dy));
+      const target = 90;
+      const force = (dist-target) * 0.02;
+      const fx = dx/dist*force, fy = dy/dist*force;
+      a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
+    });
+    // centering
+    nodes.forEach(n=>{
+      n.vx += (cx-n.x)*0.002; n.vy += (cy-n.y)*0.002;
+      n.x += n.vx; n.y += n.vy;
+      n.vx *= 0.82; n.vy *= 0.82;
+    });
+  }
+
+  const svg = document.createElementNS(NS,"svg");
+  svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const zoomGroup = document.createElementNS(NS,"g");
+  zoomGroup.setAttribute("class","zoomGroup");
+  svg.appendChild(zoomGroup);
+
+  const linkEls = {};
+  const neighbors = {};
+  edges.forEach(([a,b],i)=>{
+    const p = document.createElementNS(NS,"path");
+    p.setAttribute("class","link");
+    p.setAttribute("d",`M${a.x},${a.y} L${b.x},${b.y}`);
+    zoomGroup.appendChild(p);
+    (linkEls[a.id] = linkEls[a.id]||[]).push(p);
+    (linkEls[b.id] = linkEls[b.id]||[]).push(p);
+    (neighbors[a.id] = neighbors[a.id]||new Set()).add(b.id);
+    (neighbors[b.id] = neighbors[b.id]||new Set()).add(a.id);
+  });
+  const nodeEls = {};
+  function focusNode(id){
+    const keep = new Set([id, ...(neighbors[id]||[])]);
+    Object.entries(nodeEls).forEach(([nid,el])=>{ el.classList.toggle("dim", !keep.has(nid)); });
+  }
+  function clearFocus(){ Object.values(nodeEls).forEach(el=>el.classList.remove("dim")); }
+
+  nodes.forEach(n=>{
+    const g = document.createElementNS(NS,"g");
+    let cls = "node";
+    if(n.type==="hub") cls += " hub section";
+    else cls += " entry" + (n.match?" match":"") + (n.entry && n.entry.needs_review?" review":"");
+    g.setAttribute("class", cls);
+    g.setAttribute("transform", `translate(${n.x},${n.y})`);
+    const c = document.createElementNS(NS,"circle");
+    c.setAttribute("r", n.r);
+    g.appendChild(c);
+    if(n.type==="hub"){
+      const t = document.createElementNS(NS,"text");
+      t.setAttribute("x", n.r+4); t.setAttribute("y", 3);
+      t.textContent = n.label;
+      g.appendChild(t);
+    }
+    const hoverHtml = n.type==="hub"
+      ? `<b>${n.label}</b><span class="sm">${sources.filter(s=>s.construct===n.construct).length} sources</span>`
+      : `<b>${n.entry.title.length>70?n.entry.title.slice(0,68)+"…":n.entry.title}</b><span class="sm">${n.entry.authors||"—"} ${n.entry.year?("· "+n.entry.year):""}</span>`;
+    g.addEventListener("mouseenter", (ev)=>{
+      showTooltip(ev, hoverHtml);
+      (linkEls[n.id]||[]).forEach(p=>p.classList.add("hi"));
+      focusNode(n.id);
+    });
+    g.addEventListener("mousemove", moveTooltip);
+    g.addEventListener("mouseleave", ()=>{
+      hideTooltip();
+      (linkEls[n.id]||[]).forEach(p=>p.classList.remove("hi"));
+      clearFocus();
+    });
+    nodeEls[n.id] = g;
+    g.addEventListener("click", ()=>{
+      if(n.type==="hub") showDetail({type:"section", id:-1, name:n.label+" (construct)", entries: sources.filter(s=>s.construct===n.construct)});
+      else showDetail({type:"entry", entry:n.entry});
+    });
+    zoomGroup.appendChild(g);
+  });
+
+  const host = document.getElementById("svgHost");
+  host.innerHTML = "";
+  host.appendChild(svg);
+  attachZoomPan(svg, zoomGroup, host);
+  renderLegend("network");
+}
+
+function showDetail(payload){
+  const d = document.getElementById("detail");
+  if(payload.type==="entry"){
+    const e = payload.entry;
+    const link = linkFor(e);
+    d.innerHTML = `
+      <h2>${e.title}</h2>
+      <div class="meta" style="color:var(--sub);font-size:12px;margin-bottom:8px;">${e.authors||"—"} ${e.year?("· "+e.year):""} · <i>${e.venue||""}</i></div>
+      <div class="note" style="font-size:13px;line-height:1.5;margin-bottom:10px;">${e.note||""}</div>
+      <div class="tagrow" id="tagDisplay">
+        ${themesOf(e).map(t=>`<span class="tag">${(LABELS.theme[t]||t)}</span>`).join("")}
+        <span class="tag geo">${LABELS.geography[e.geography]||e.geography}</span>
+        <span class="tag">${LABELS.method[e.method]||e.method}</span>
+        <span class="tag">${LABELS.construct[e.construct]||e.construct}</span>
+        ${e.needs_review?'<span class="badge review">Needs Review</span>':''}
+      </div>
+      <div style="margin-top:8px;"><span id="editToggle" style="font-size:11.5px;color:var(--accent);cursor:pointer;text-decoration:underline;">✎ Correct tags</span></div>
+      <div id="editForm" style="display:none;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);"></div>
+      ${link?`<div style="margin-top:14px;display:flex;gap:8px;"><button class="openbtn" id="detailOpen">Open here</button><a class="openbtn ext" href="${link.ext_href}" target="_blank">Open in new tab ↗</a></div>`:""}
+    `;
+    if(link) document.getElementById("detailOpen").onclick = ()=> openViewer(e);
+
+    document.getElementById("editToggle").onclick = ()=>{
+      const form = document.getElementById("editForm");
+      const opts = (dict, cur)=> Object.entries(dict).map(([k,v])=>`<option value="${k}" ${k===cur?"selected":""}>${v}</option>`).join("");
+      const themeChecks = Object.entries(LABELS.theme).map(([k,v])=>
+        `<label style="display:inline-flex;align-items:center;gap:4px;margin:2px 8px 2px 0;font-size:11.5px;">
+          <input type="checkbox" value="${k}" ${themesOf(e).includes(k)?"checked":""}> ${v}
+        </label>`).join("");
+      form.innerHTML = `
+        <div style="font-size:10.5px;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Theme (multi-select)</div>
+        <div id="themeChecks" style="margin-bottom:10px;">${themeChecks}</div>
+        <div style="font-size:10.5px;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Geography</div>
+        <select id="fGeo" style="width:100%;margin-bottom:10px;padding:6px;border-radius:6px;border:1px solid var(--line);font-family:var(--font-body);">${opts(LABELS.geography, e.geography)}</select>
+        <div style="font-size:10.5px;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Method</div>
+        <select id="fMethod" style="width:100%;margin-bottom:10px;padding:6px;border-radius:6px;border:1px solid var(--line);font-family:var(--font-body);">${opts(LABELS.method, e.method)}</select>
+        <div style="font-size:10.5px;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Construct</div>
+        <select id="fConstruct" style="width:100%;margin-bottom:10px;padding:6px;border-radius:6px;border:1px solid var(--line);font-family:var(--font-body);">${opts(LABELS.construct, e.construct)}</select>
+        ${e.needs_review?`<label style="display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:10px;"><input type="checkbox" id="fClearReview" checked> Mark as reviewed (remove "Needs Review" flag)</label>`:""}
+        <div style="display:flex;gap:8px;">
+          <button class="openbtn" id="fSave">Save correction</button>
+          <button class="openbtn ext" id="fCancel">Cancel</button>
+        </div>
+      `;
+      form.style.display = "block";
+      document.getElementById("fCancel").onclick = ()=>{ form.style.display="none"; };
+      document.getElementById("fSave").onclick = ()=>{
+        const theme = [...form.querySelectorAll('#themeChecks input:checked')].map(i=>i.value);
+        const patch = {
+          theme: theme.length?theme:["unsorted"],
+          geography: document.getElementById("fGeo").value,
+          method: document.getElementById("fMethod").value,
+          construct: document.getElementById("fConstruct").value
+        };
+        const clearReview = document.getElementById("fClearReview");
+        if(clearReview && clearReview.checked) patch.needs_review = false;
+        overrides[e.id] = Object.assign({}, overrides[e.id]||{}, patch);
+        saveOverrides(overrides);
+        Object.assign(e, patch);
+        render();
+        showDetail({type:"entry", entry:e});
+      };
+    };
+  } else {
+    d.innerHTML = `
+      <h2>${payload.name}</h2>
+      <div class="meta" style="margin-bottom:10px;">${payload.entries.length} sources in this section</div>
+      ${payload.entries.map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;cursor:pointer;" data-id="${e.id}">
+        <b>${e.authors||"—"}</b> (${e.year||"n.d."}) — ${e.title}${e.needs_review?' <span class="badge review">New</span>':''}
+      </div>`).join("")}
+    `;
+    d.querySelectorAll("[data-id]").forEach(row=>{
+      row.onclick = ()=>{
+        const e = LIVE_SOURCES.find(x=>String(x.id)===row.dataset.id);
+        if(e) showDetail({type:"entry", entry:e});
+      };
+    });
+  }
+}
+
+/* ===================== BIBLIOGRAPHY ===================== */
+function formatReference(e){
+  const authors = e.authors || "Unknown Author";
+  const year = e.year ? `(${e.year}).` : "(n.d.).";
+  const venuePart = e.venue ? ` ${e.venue}.` : "";
+  const link = bestSrc(e);
+  const linkPart = link ? ` Available at: ${link.ext}` : "";
+  return `${authors} ${year} ${e.title}.${venuePart}${linkPart}`;
+}
+function buildBibliographyGroups(list){
+  const groups = {};
+  list.forEach(e=>{
+    const key = e.section_name || "Unsorted / Needs Review";
+    (groups[key] = groups[key] || []).push(e);
+  });
+  const order = [...new Map(LIVE_SOURCES.map(s=>[s.section_name, s.section])).entries()].sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
+  return order.filter(k=>groups[k]).map(k=>({ name:k, items: groups[k].sort((a,b)=>(a.authors||"").localeCompare(b.authors||"")) }));
+}
+function renderBibliography(list){
+  const host = document.getElementById("biblioContent");
+  const groups = buildBibliographyGroups(list);
+  host.innerHTML = groups.map(g=>`
+    <h3>${g.name}</h3>
+    ${g.items.map(e=>`<p>${formatReference(e)}${e.needs_review?'<span class="rev">needs review</span>':''}</p>`).join("")}
+  `).join("");
+}
+function bibliographyMarkdown(list){
+  const groups = buildBibliographyGroups(list);
+  let out = "# Classroom Catalytics Library — Bibliography\n\n";
+  out += `_Generated ${new Date().toLocaleString()} · ${list.length} sources_\n\n`;
+  groups.forEach(g=>{
+    out += `## ${g.name}\n\n`;
+    g.items.forEach(e=>{
+      out += `- ${formatReference(e)}${e.needs_review?" **(needs review)**":""}\n`;
+    });
+    out += "\n";
+  });
+  return out;
+}
+function bibliographyDocHtml(list){
+  const groups = buildBibliographyGroups(list);
+  let body = `<h1 style="font-family:Georgia,serif;">Classroom Catalytics Library — Bibliography</h1>`;
+  body += `<p style="font-size:11px;color:#555;">Generated ${new Date().toLocaleString()} · ${list.length} sources</p>`;
+  groups.forEach(g=>{
+    body += `<h2 style="font-family:Georgia,serif;border-bottom:1px solid #ccc;">${g.name}</h2>`;
+    g.items.forEach(e=>{
+      body += `<p style="margin:0 0 8px;text-indent:-24px;padding-left:24px;">${formatReference(e)}${e.needs_review?" <b>(needs review)</b>":""}</p>`;
+    });
+  });
+  return `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+  <head><meta charset="utf-8"><title>Bibliography</title></head>
+  <body style="font-family:Calibri,Arial,sans-serif;font-size:12pt;">${body}</body></html>`;
+}
+function downloadBlob(content, filename, mime){
+  const blob = new Blob([content], {type:mime});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+document.getElementById("dlMd").onclick = ()=>{
+  const list = LIVE_SOURCES.filter(matches);
+  downloadBlob(bibliographyMarkdown(list), "classroom-catalytics-bibliography.md", "text/markdown");
+};
+document.getElementById("dlDoc").onclick = ()=>{
+  const list = LIVE_SOURCES.filter(matches);
+  downloadBlob(bibliographyDocHtml(list), "classroom-catalytics-bibliography.doc", "application/msword");
+};
+
+/* ===================== MASTER RENDER ===================== */
+function render(){
+  buildFilterBar();
+  const list = LIVE_SOURCES.filter(matches);
+  document.getElementById("matchcount").textContent = list.length;
+  document.getElementById("totalcount").textContent = LIVE_SOURCES.length;
+  renderLibrary(list);
+  renderTable(list);
+  if(mmMode==="network") renderNetwork(list); else renderMindmap(list);
+  renderBibliography(list);
+}
+render();
+syncFromDrive();
+
+/* ===================== AUTOMATIC BACKGROUND SYNC ===================== */
+// No server/webhook is possible on a static site, so "automatic" means: check
+// periodically while the tab is open, and immediately whenever you switch back
+// to this tab — covers the realistic case of "I just added files in another tab."
+setInterval(()=>{ if(!document.hidden) syncFromDrive(true); }, 120000); // every 2 min
+document.addEventListener("visibilitychange", ()=>{
+  if(!document.hidden) syncFromDrive(true);
+});
+
+// table sort
+let sortKey=null, sortAsc=true;
+document.querySelectorAll("#datatable th[data-k]").forEach(th=>{
+  th.onclick = ()=>{
+    const k = th.dataset.k;
+    sortAsc = (sortKey===k) ? !sortAsc : true;
+    sortKey = k;
+    LIVE_SOURCES.sort((a,b)=>{
+      const av=(a[k]??""), bv=(b[k]??"");
+      if(av<bv) return sortAsc?-1:1;
+      if(av>bv) return sortAsc?1:-1;
+      return 0;
+    });
+    render();
+  };
+});
+</script>
+</body>
+</html>
