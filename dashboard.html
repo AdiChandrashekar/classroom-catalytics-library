@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Classroom Catalytics Library</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf8f2">
 <style>
   @font-face{
     font-family:"Marcellus"; font-style:normal; font-weight:400; font-display:swap;
@@ -18,363 +19,667 @@
     src:url("fonts/googlesans-italic.woff2") format("woff2");
   }
 
+  /* ================= TOKENS ================= */
   :root{
-    /* palette (adjusted for readability): Dusty Olive · Apricot Cream · Coffee Bean · Aquamarine · Vibrant Coral */
-    --shadow:#1e000e;      /* Coffee Bean — primary ink, near-black */
-    --saddle:#788475;      /* Dusty Olive — secondary text/fills */
-    --chocolate:#ff6f59;   /* Vibrant Coral — primary interactive accent */
-    --tuscan:#f7d08a;      /* Apricot Cream — used for soft fills only, too light for text */
-    --gold:#a5ffd6;        /* Aquamarine — used for soft fills only, too light for text */
+    /* palette: Dusty Olive · Apricot Cream · Coffee Bean · Aquamarine · Vibrant Coral */
+    --shadow:#1e000e;
+    --saddle:#788475;
+    --chocolate:#ff6f59;
+    --tuscan:#f7d08a;
+    --gold:#a5ffd6;
 
-    --bg:#faf8f2;          /* near-white, warm paper */
-    --panel:#ffffff;
-    --card:#ffffff;
-    --ink:#1e000e;         /* Coffee Bean — body/heading text, high contrast on white */
-    --sub:#5c6a55;         /* Dusty Olive, darkened for AA-readable secondary text */
-    --line:#e7e1d1;        /* soft neutral border derived from the warm palette */
+    --bg:#faf8f2;
+    --ink:#1e000e;
+    --sub:#5c6a55;
+    --line:rgba(30,0,14,.09);
+    --accent:#ff6f59;
+    --accent2:#b9791c;
+    --good:#1f9d6f;
+    --bad:#c9432f;
+    --on-accent:#1e000e;
 
-    --accent:#ff6f59;      /* Vibrant Coral — buttons, active states, links */
-    --accent2:#b9791c;     /* Apricot Cream, darkened for readable heading-adjacent accents */
-    --good:#1f9d6f;        /* Aquamarine, darkened for readable "archived/done" state */
-    --bad:#c9432f;         /* Vibrant Coral, darkened for "external/blocked" state text */
-    --on-accent:#1e000e;   /* dark text sits on top of the light-toned accent fills */
+    /* tints: soft fill + a text colour that stays AA-readable on it */
+    --tint-coral:rgba(255,111,89,.15);    --on-tint-coral:#a3321f;
+    --tint-apricot:rgba(247,208,138,.45); --on-tint-apricot:#744d0e;
+    --tint-olive:rgba(120,132,117,.17);   --on-tint-olive:#434f3d;
+    --tint-aqua:rgba(165,255,214,.55);    --on-tint-aqua:#0d6444;
+    --tint-ink:rgba(30,0,14,.06);
 
+    /* materials */
+    --mat-blur:blur(24px) saturate(190%);
+    --mat-regular:rgba(255,255,255,.56);
+    --mat-thick:rgba(255,255,255,.78);
+    --mat-dark:rgba(30,0,14,.7);
+    --paper:rgba(255,255,255,.9);
+    --rim:linear-gradient(150deg, rgba(255,255,255,.95), rgba(255,255,255,.2) 32%, rgba(255,255,255,0) 55%, rgba(255,255,255,.55));
+    --sheen:inset 0 1px 0 rgba(255,255,255,.75), inset 0 -10px 20px -14px rgba(255,255,255,.7);
+    --hairline:inset 0 0 0 .5px rgba(30,0,14,.08);
+
+    /* elevation */
+    --lift-1:0 1px 2px rgba(30,0,14,.05), 0 6px 18px -6px rgba(30,0,14,.16);
+    --lift-2:0 2px 4px rgba(30,0,14,.05), 0 16px 40px -12px rgba(30,0,14,.26);
+    --lift-3:0 4px 10px rgba(30,0,14,.06), 0 32px 80px -20px rgba(30,0,14,.42);
+
+    /* shape + space */
+    --r-sm:12px; --r-md:16px; --r-lg:22px; --r-xl:28px; --r-pill:999px;
+    --control:36px; --control-sm:30px; --bar:calc(var(--control) + 8px);
+
+    /* type */
     --font-head:"Marcellus", Georgia, "Times New Roman", serif;
     --font-body:"Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --fs-cap:11px; --fs-foot:12px; --fs-sub:13px; --fs-body:14px; --fs-callout:15px; --fs-t3:17px; --fs-t2:20px; --fs-t1:30px;
 
-    /* liquid glass surfaces */
-    --glass-blur: blur(22px) saturate(180%);
-    --glass-fill: rgba(255,255,255,.42);
-    --glass-fill-strong: rgba(255,255,255,.62);
-    --glass-border: rgba(255,255,255,.55);
-    --glass-border-soft: rgba(255,255,255,.35);
-    --glass-shadow: 0 8px 32px rgba(30,0,14,.14), inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(255,255,255,.15);
-    --glass-shadow-soft: 0 4px 18px rgba(30,0,14,.10), inset 0 1px 0 rgba(255,255,255,.55);
+    /* motion */
+    --ease:cubic-bezier(.2,.8,.2,1);
+    --spring:cubic-bezier(.34,1.36,.54,1);
+    --d1:.16s; --d2:.28s; --d3:.48s;
+
+    /* measured at runtime from the floating chrome */
+    --inset-top:120px; --inset-bottom:0px;
+  }
+  @media (pointer:coarse){ :root{ --control:42px; --control-sm:36px; } }
+  @media (prefers-reduced-transparency: reduce){
+    :root{ --mat-regular:rgba(255,255,255,.97); --mat-thick:#fff; --mat-dark:#1e000e; --paper:#fff; }
+  }
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    :root{ --mat-regular:rgba(255,255,255,.95); --mat-thick:rgba(255,255,255,.98); --mat-dark:rgba(30,0,14,.94); }
   }
 
-  *{box-sizing:border-box;}
+  /* ================= BASE ================= */
+  *{ box-sizing:border-box; }
   html, body{ height:100%; }
   body{
-    margin:0; font-family:var(--font-body);
-    color:var(--ink); height:100vh; overflow:hidden;
+    margin:0; font-family:var(--font-body); font-size:var(--fs-body); color:var(--ink);
+    background:var(--bg); overflow:hidden; -webkit-font-smoothing:antialiased;
+  }
+  button{ font:inherit; color:inherit; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .ic{
+    width:18px; height:18px; flex:none; fill:none; stroke:currentColor;
+    stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;
+  }
+  .ambient{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(880px 620px at 8% -8%, rgba(255,111,89,.30), transparent 60%),
-      radial-gradient(760px 640px at 96% 6%, rgba(165,255,214,.38), transparent 62%),
-      radial-gradient(900px 700px at 20% 108%, rgba(247,208,138,.42), transparent 60%),
-      radial-gradient(820px 680px at 100% 100%, rgba(120,132,117,.28), transparent 58%),
+      radial-gradient(60vmax 50vmax at 0% 0%, rgba(255,111,89,.24), transparent 60%),
+      radial-gradient(55vmax 50vmax at 100% 0%, rgba(165,255,214,.42), transparent 60%),
+      radial-gradient(60vmax 55vmax at 8% 100%, rgba(247,208,138,.46), transparent 60%),
+      radial-gradient(55vmax 55vmax at 100% 100%, rgba(120,132,117,.24), transparent 60%),
       var(--bg);
-    background-attachment:fixed;
   }
-  .app{ display:flex; flex-direction:column; height:100vh; }
-  header{
-    padding:14px 20px; border-bottom:1px solid var(--glass-border-soft);
-    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
-    background:var(--glass-fill); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-    box-shadow:var(--glass-shadow-soft); position:relative; z-index:20;
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+  ::-webkit-scrollbar-thumb{ background:rgba(30,0,14,.16); border-radius:10px; border:3px solid transparent; background-clip:padding-box; }
+
+  /* ================= MATERIAL ================= */
+  .glass{
+    position:relative; background:var(--mat-regular);
+    -webkit-backdrop-filter:var(--mat-blur); backdrop-filter:var(--mat-blur);
+    box-shadow:var(--lift-1), var(--sheen);
   }
-  h1{ font-family:var(--font-head); font-size:20px; margin:0; font-weight:700; letter-spacing:.2px; white-space:nowrap; color:var(--accent2);}
-  h1 span{ color:var(--sub); font-weight:400; font-size:12px; font-family:var(--font-body); }
-  .tabs{
-    display:flex; gap:4px; background:var(--glass-fill); border:1px solid var(--glass-border); border-radius:14px; padding:3px;
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-soft);
+  .glass::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
+    background:var(--rim);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
   }
-  .tab{ padding:6px 14px; border-radius:10px; cursor:pointer; font-size:13px; color:var(--sub); user-select:none; transition:background .15s, color .15s;}
-  .tab.active{
-    background:linear-gradient(135deg, var(--chocolate), var(--accent2)); color:var(--on-accent); font-weight:700;
-    box-shadow:0 4px 14px rgba(255,111,89,.35), inset 0 1px 0 rgba(255,255,255,.4);
-  }
-  .search{ flex:1; min-width:160px; }
-  .search input{
-    width:100%; padding:8px 12px; border-radius:10px; border:1px solid var(--glass-border);
-    background:var(--glass-fill); color:var(--ink); font-size:13px; outline:none; font-family:var(--font-body);
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-soft);
-  }
-  .search input:focus{ border-color:var(--accent); }
-  .stat{ font-size:12px; color:var(--sub); white-space:nowrap; }
-  .stat b{ color:var(--good); }
-  .syncbar{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--sub); white-space:nowrap; }
-  .syncdot{ width:7px; height:7px; border-radius:50%; background:var(--line); display:inline-block; }
-  .syncdot.live{ background:var(--good); }
-  .syncdot.err{ background:var(--bad); }
+  .glass.thick{ background:var(--mat-thick); box-shadow:var(--lift-2), var(--sheen); }
+  .glass.dark{ background:var(--mat-dark); color:#fff; box-shadow:var(--lift-2), inset 0 1px 0 rgba(255,255,255,.14); }
+  .glass.dark::before{ opacity:.3; }
+
+  /* ================= CONTROLS ================= */
   .iconbtn{
-    border:1px solid var(--glass-border); background:var(--glass-fill); color:var(--sub); border-radius:10px;
-    width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px;
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-soft);
-    transition:transform .15s, border-color .15s, color .15s;
+    width:var(--control); height:var(--control); flex:none; border:0; border-radius:50%;
+    display:grid; place-items:center; background:transparent; color:var(--ink); cursor:pointer; text-decoration:none;
+    transition:background var(--d1) var(--ease), transform var(--d2) var(--spring);
   }
-  .iconbtn:hover{ border-color:var(--accent); color:var(--accent); transform:translateY(-1px); }
+  .iconbtn:hover{ background:rgba(30,0,14,.07); }
+  .iconbtn:active{ transform:scale(.9); }
+  .iconbtn.sm{ width:var(--control-sm); height:var(--control-sm); }
+  .iconbtn.sm .ic{ width:16px; height:16px; }
 
-  .filters{
-    padding:8px 20px; border-bottom:1px solid var(--glass-border-soft); display:flex; gap:8px; flex-wrap:wrap;
-    align-items:center; font-size:12px; position:relative;
-    background:var(--glass-fill); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-    box-shadow:var(--glass-shadow-soft); z-index:15;
+  .btn{
+    position:relative; display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    height:var(--control); padding:0 16px; border:0; border-radius:var(--r-pill); cursor:pointer;
+    font-size:var(--fs-sub); font-weight:500; white-space:nowrap; text-decoration:none; color:var(--ink);
+    background:var(--mat-thick); box-shadow:var(--lift-1), var(--sheen), var(--hairline);
+    transition:transform var(--d2) var(--spring), box-shadow var(--d1) var(--ease);
   }
+  .btn:hover{ box-shadow:var(--lift-2), var(--sheen), var(--hairline); }
+  .btn:active{ transform:scale(.96); }
+  .btn .ic{ width:16px; height:16px; }
+  .btn.primary{
+    background:linear-gradient(180deg, #ff8b79, var(--chocolate)); color:var(--on-accent); font-weight:600;
+    box-shadow:0 1px 2px rgba(163,50,31,.25), 0 6px 16px -6px rgba(255,111,89,.75),
+               inset 0 1px 0 rgba(255,255,255,.55), inset 0 -1px 0 rgba(163,50,31,.2);
+  }
+  .btn.sm{ height:var(--control-sm); padding:0 12px; font-size:var(--fs-foot); }
+
+  .textlink{
+    display:inline-flex; align-items:center; gap:6px; margin-top:16px; padding:0; border:0; background:none; cursor:pointer;
+    color:var(--on-tint-coral); font-size:var(--fs-foot); font-weight:600;
+  }
+  .textlink .ic{ width:15px; height:15px; }
+
+  input[type=checkbox]{
+    -webkit-appearance:none; appearance:none; flex:none; width:18px; height:18px; margin:0; border-radius:6px; cursor:pointer;
+    background:#fff; box-shadow:inset 0 0 0 1.5px rgba(30,0,14,.22);
+    transition:background-color var(--d1), box-shadow var(--d1);
+  }
+  input[type=checkbox]:checked{
+    background:var(--chocolate) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e000e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/14px no-repeat;
+    box-shadow:inset 0 0 0 1px rgba(163,50,31,.35);
+  }
+  select{
+    -webkit-appearance:none; appearance:none; height:var(--control-sm); padding:0 30px 0 12px; border:0; border-radius:var(--r-pill);
+    font:inherit; font-size:var(--fs-foot); font-weight:500; color:var(--ink); cursor:pointer;
+    background:rgba(30,0,14,.055) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c6a55' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E") right 10px center/14px no-repeat;
+    transition:background-color var(--d1);
+  }
+  select:hover{ background-color:rgba(30,0,14,.09); }
+  select.full{ width:100%; height:var(--control); border-radius:var(--r-sm); background-color:#fff; box-shadow:var(--hairline); }
+  select.status[data-state=reading]{ background-color:var(--tint-apricot); color:var(--on-tint-apricot); }
+  select.status[data-state=studied]{ background-color:var(--tint-aqua); color:var(--on-tint-aqua); }
+
+  /* segmented control: a lifted lens slides beneath the active item */
+  .seg{ display:flex; align-items:stretch; gap:2px; height:var(--bar); padding:4px; border-radius:var(--r-pill); }
+  .seg-lens{
+    position:absolute; top:0; left:0; width:0; height:0; z-index:0; border-radius:var(--r-pill);
+    background:rgba(255,255,255,.94);
+    box-shadow:0 1px 2px rgba(30,0,14,.08), 0 4px 12px -2px rgba(30,0,14,.16), inset 0 1px 0 #fff, var(--hairline);
+  }
+  .seg.ready .seg-lens{ transition:transform var(--d3) var(--spring), width var(--d3) var(--spring), height var(--d3) var(--spring); }
+  .seg-item{
+    position:relative; z-index:1; display:flex; align-items:center; gap:7px; padding:0 14px; border:0; border-radius:var(--r-pill);
+    background:none; color:var(--sub); font-size:var(--fs-sub); font-weight:500; white-space:nowrap; cursor:pointer;
+    transition:color var(--d2) var(--ease);
+  }
+  .seg-item:hover, .seg-item.active{ color:var(--ink); }
+  .seg-item .ic{ transition:color var(--d2) var(--ease); }
+  .seg-item.active .ic{ color:var(--chocolate); }
+  .seg-item .lbl-short{ display:none; }
+
+  .tagrow{ display:flex; flex-wrap:wrap; gap:6px; }
+  .tag{
+    display:inline-flex; align-items:center; height:22px; padding:0 9px; border-radius:var(--r-pill);
+    font-size:var(--fs-cap); font-weight:500; white-space:nowrap;
+    background:var(--tint-olive); color:var(--on-tint-olive);
+  }
+  .tag.t-theme{ background:var(--tint-coral); color:var(--on-tint-coral); }
+  .tag.t-geo{ background:var(--tint-apricot); color:var(--on-tint-apricot); }
+  .tag.t-construct{ background:var(--tint-aqua); color:var(--on-tint-aqua); }
+  .tag.muted{ background:var(--tint-ink); color:var(--sub); }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:5px; height:20px; padding:0 8px; border-radius:var(--r-pill);
+    font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; text-indent:0;
+  }
+  .badge::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .badge.done{ background:var(--tint-aqua); color:var(--on-tint-aqua); }
+  .badge.pdf{ background:var(--tint-apricot); color:var(--on-tint-apricot); }
+  .badge.ext{ background:var(--tint-ink); color:var(--sub); }
+  .badge.review{ background:var(--tint-coral); color:var(--on-tint-coral); }
+
+  /* ================= FLOATING CHROME ================= */
+  .chrome{
+    position:fixed; top:0; left:0; right:0; z-index:50; pointer-events:none;
+    display:flex; flex-direction:column; gap:10px; padding:max(12px, env(safe-area-inset-top)) 16px 0;
+  }
+  .chrome-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .chrome-row > *{ pointer-events:auto; }
+
+  .brand{ display:flex; align-items:center; gap:10px; height:var(--bar); padding:0 18px 0 6px; border-radius:var(--r-pill); min-width:0; }
+  .brand-mark{
+    width:calc(var(--bar) - 12px); height:calc(var(--bar) - 12px); flex:none; border-radius:50%; display:grid; place-items:center; color:#fff;
+    background:radial-gradient(circle at 32% 26%, #ffb8aa, var(--chocolate) 58%, #e04e38);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.6), 0 2px 8px rgba(255,111,89,.45);
+  }
+  .brand-mark .ic{ stroke-width:2; }
+  .brand-name{ margin:0; font-family:var(--font-head); font-weight:700; font-size:var(--fs-t3); letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .search{
+    flex:1 1 220px; min-width:180px; height:var(--bar); display:flex; align-items:center; gap:8px;
+    padding:0 5px 0 15px; border-radius:var(--r-pill); color:var(--sub);
+    transition:box-shadow var(--d2) var(--ease);
+  }
+  .search:focus-within{ box-shadow:var(--lift-1), var(--sheen), 0 0 0 3px rgba(255,111,89,.3); }
+  .search input{
+    flex:1; min-width:0; height:100%; border:0; outline:0; background:transparent;
+    font:inherit; font-size:var(--fs-body); color:var(--ink);
+  }
+  .search input::placeholder{ color:var(--sub); }
+  #filterToggle{ display:none; position:relative; }
+  .dotcount{
+    position:absolute; top:2px; right:0; min-width:17px; height:17px; padding:0 4px; border-radius:var(--r-pill);
+    background:var(--chocolate); color:var(--on-accent); font-size:10px; font-weight:700; display:none; place-items:center;
+  }
+  .dotcount.on{ display:grid; }
+
+  .actions{ display:flex; align-items:center; gap:2px; height:var(--bar); padding:4px; border-radius:var(--r-pill); }
+  .sync{ display:flex; align-items:center; gap:8px; padding:0 10px 0 12px; font-size:var(--fs-foot); color:var(--sub); white-space:nowrap; }
+  .syncdot{ width:8px; height:8px; flex:none; border-radius:50%; background:rgba(30,0,14,.22); }
+  .syncdot.live{ background:var(--good); box-shadow:0 0 0 3px rgba(31,157,111,.2); animation:pulse 2.4s ease-in-out infinite; }
+  .syncdot.err{ background:var(--bad); box-shadow:0 0 0 3px rgba(201,67,47,.2); }
+  @keyframes pulse{ 50%{ box-shadow:0 0 0 6px rgba(31,157,111,0); } }
+
+  .filters-row{ flex-wrap:nowrap; align-items:flex-start; }
+  #filterBar{ pointer-events:none; flex:1; min-width:0; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  #filterBar > *{ pointer-events:auto; }
+  .fwrap{ position:relative; }
   .filterbtn{
-    display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:100px; border:1px solid var(--glass-border);
-    background:var(--glass-fill-strong); color:var(--sub); font-size:12px; cursor:pointer; user-select:none; white-space:nowrap;
-    box-shadow:var(--glass-shadow-soft); transition:border-color .15s, transform .15s;
+    display:inline-flex; align-items:center; gap:6px; height:var(--control); padding:0 10px 0 15px; border:0; border-radius:var(--r-pill);
+    font-size:var(--fs-sub); font-weight:500; color:var(--ink); white-space:nowrap; cursor:pointer;
+    transition:transform var(--d2) var(--spring), background-color var(--d1);
   }
-  .filterbtn:hover{ border-color:var(--accent); transform:translateY(-1px); }
-  .filterbtn.active{ border-color:var(--accent); color:var(--ink); background:rgba(255,111,89,.18); }
-  .filterbtn .n{ background:var(--accent); color:var(--on-accent); font-weight:700; font-size:10px; padding:1px 6px; border-radius:100px; }
-  .filterbtn .caret{ font-size:9px; opacity:.6; }
+  .filterbtn:active{ transform:scale(.96); }
+  .filterbtn.active{ background:rgba(255,238,234,.85); color:var(--on-tint-coral); }
+  .filterbtn .chev{ width:14px; height:14px; color:var(--sub); transition:transform var(--d2) var(--ease); }
+  .filterbtn.open .chev{ transform:rotate(180deg); }
+  .filterbtn .n{
+    min-width:18px; height:18px; padding:0 5px; border-radius:var(--r-pill); display:inline-grid; place-items:center;
+    background:var(--chocolate); color:var(--on-accent); font-size:10.5px; font-weight:700;
+  }
   .filterpop{
-    position:absolute; top:100%; margin-top:6px; background:var(--glass-fill-strong); border:1px solid var(--glass-border); border-radius:14px;
-    padding:10px; box-shadow:var(--glass-shadow); z-index:40; min-width:200px; max-width:280px;
-    max-height:280px; overflow-y:auto; display:none;
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+    position:absolute; top:calc(100% + 8px); left:0; z-index:60; min-width:230px; max-width:300px; max-height:min(380px, 60vh);
+    overflow-y:auto; padding:6px; border-radius:var(--r-lg);
+    opacity:0; visibility:hidden; transform:scale(.92) translateY(-6px); transform-origin:top left;
+    transition:opacity var(--d2) var(--ease), transform var(--d3) var(--spring), visibility 0s linear var(--d2);
   }
-  .filterpop.open{ display:block; }
-  .filterpop label{ display:flex; align-items:center; gap:7px; font-size:12px; padding:5px 4px; border-radius:6px; cursor:pointer; }
-  .filterpop label:hover{ background:rgba(255,255,255,.5); }
-  .filterpop .popfoot{ display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px solid var(--glass-border-soft); }
-  .filterpop .popfoot span{ font-size:11px; color:var(--accent); cursor:pointer; }
-  .chips{ display:flex; flex-wrap:wrap; gap:5px; max-width:520px; }
-  .chip{
-    padding:3px 9px; border-radius:100px; border:1px solid var(--glass-border); cursor:pointer;
-    background:var(--glass-fill-strong); color:var(--sub); font-size:11.5px; white-space:nowrap; transition:transform .15s;
+  .filterpop.open{ opacity:1; visibility:visible; transform:none; transition:opacity var(--d2) var(--ease), transform var(--d3) var(--spring), visibility 0s; }
+  .filterpop label{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--r-sm); font-size:var(--fs-sub); cursor:pointer; }
+  .filterpop label:hover{ background:rgba(30,0,14,.05); }
+  .popfoot{ display:flex; justify-content:space-between; gap:8px; margin-top:4px; padding:8px 4px 2px; border-top:1px solid var(--line); }
+  .clearbtn{
+    height:var(--control); padding:0 14px; border:0; border-radius:var(--r-pill); cursor:pointer;
+    color:var(--on-tint-coral); font-size:var(--fs-foot); font-weight:600;
   }
-  .chip.on{ background:linear-gradient(135deg, var(--chocolate), var(--accent2)); border-color:var(--accent); color:var(--on-accent); font-weight:700; box-shadow:0 3px 10px rgba(255,111,89,.3);}
-  .clearbtn{ align-self:flex-start; margin-top:14px; font-size:11.5px; color:var(--accent); cursor:pointer; text-decoration:underline; }
+  .stat{
+    flex:none; height:var(--control); display:flex; align-items:center; gap:4px; padding:0 14px; border-radius:var(--r-pill);
+    font-size:var(--fs-foot); color:var(--sub); white-space:nowrap;
+  }
+  .stat b{ color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums; }
 
-  main{ flex:1; overflow:hidden; position:relative; }
-  .view{ display:none; height:100%; overflow:auto; flex-direction:column; }
-  .view.active{ display:flex; }
-  #view-library.active, #view-table.active, #view-biblio.active{ display:block; }
-
-  /* ---- Mindmap view ---- */
-  .mmToolbar{
-    display:flex; align-items:center; gap:14px; padding:8px 20px; border-bottom:1px solid var(--glass-border-soft);
-    flex-shrink:0; flex-wrap:wrap;
-    background:var(--glass-fill); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+  /* ================= CONTENT LAYER ================= */
+  main{ position:fixed; inset:0; z-index:1; }
+  .scroll-edge{
+    position:fixed; left:0; right:0; top:0; z-index:3; pointer-events:none;
+    height:calc(var(--inset-top) + 14px);
+    background:linear-gradient(to bottom, rgba(250,248,242,.7), rgba(250,248,242,.35) 60%, rgba(250,248,242,0));
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    -webkit-mask-image:linear-gradient(to bottom, #000 50%, transparent); mask-image:linear-gradient(to bottom, #000 50%, transparent);
   }
-  .mmZoom{ display:flex; gap:4px; }
-  .mmLegend{ display:flex; gap:12px; flex-wrap:wrap; margin-left:auto; font-size:11px; color:var(--sub); }
-  .mmLegend .li{ display:flex; align-items:center; gap:5px; }
-  .mmLegend .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
-  #mindmap-wrap{ display:flex; flex:1; min-height:0; position:relative; }
-  #svgHost{ flex:1; overflow:hidden; cursor:grab; position:relative; touch-action:none; }
+  .scroll-edge.bottom{ display:none; top:auto; bottom:0; height:calc(var(--inset-bottom) + 14px); transform:scaleY(-1); }
+
+  .view{
+    position:absolute; inset:0; display:none; overflow-y:auto; overflow-x:hidden;
+    padding:calc(var(--inset-top) + 22px) 24px calc(var(--inset-bottom) + 48px);
+  }
+  .view.active{ display:block; }
+  #view-mindmap{ padding:0; overflow:hidden; }
+  .view-head{
+    max-width:1280px; margin:0 auto 22px; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .view-head h2{ margin:0; font-family:var(--font-head); font-weight:700; font-size:var(--fs-t1); letter-spacing:.2px; line-height:1.15; }
+  .view-head p{ margin:6px 0 0; max-width:560px; color:var(--sub); font-size:var(--fs-sub); line-height:1.5; }
+
+  /* ---- Mind map ---- */
+  #mindmap-wrap{ position:absolute; inset:0; }
+  #svgHost{ position:absolute; inset:0; overflow:hidden; cursor:grab; touch-action:none; }
   #svgHost.grabbing{ cursor:grabbing; }
   #svgHost svg{ display:block; }
+  .mm-float{ position:absolute; z-index:5; }
+  .mm-modes{ top:calc(var(--inset-top) + 6px); left:16px; }
+  .mm-zoom{
+    right:16px; bottom:calc(var(--inset-bottom) + 16px); display:flex; flex-direction:column; gap:2px; padding:4px; border-radius:var(--r-pill);
+    transition:right var(--d3) var(--spring), opacity var(--d2) var(--ease);
+  }
+  .mm-zoom .sep{ height:1px; margin:3px 8px; background:var(--line); }
+  #mindmap-wrap.sheet-open .mm-zoom{ right:calc(380px + 32px); }
+  .mm-legend{
+    left:16px; bottom:calc(var(--inset-bottom) + 16px); max-width:calc(100% - 120px);
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px 16px; padding:10px 18px; border-radius:var(--r-pill);
+    font-size:var(--fs-cap); color:var(--sub);
+  }
+  .mm-legend .li{ display:flex; align-items:center; gap:7px; }
+  .mm-legend .dot{ width:9px; height:9px; border-radius:50%; box-shadow:0 0 0 1.5px #fff, 0 1px 2px rgba(30,0,14,.25); }
+
   .mmtooltip{
-    position:absolute; pointer-events:none; background:rgba(30,0,14,.72); color:#fff; padding:8px 11px; border-radius:10px;
-    font-size:11.5px; line-height:1.5; max-width:260px; box-shadow:0 8px 26px rgba(30,0,14,.35), inset 0 1px 0 rgba(255,255,255,.12); z-index:30;
-    font-family:var(--font-body); backdrop-filter:blur(14px) saturate(160%); -webkit-backdrop-filter:blur(14px) saturate(160%);
-    border:1px solid rgba(255,255,255,.15);
+    position:absolute; z-index:20; pointer-events:none; max-width:280px; padding:10px 13px; border-radius:var(--r-md);
+    font-size:var(--fs-foot); line-height:1.45;
   }
   .mmtooltip.hidden{ display:none; }
-  .mmtooltip b{ display:block; font-family:var(--font-head); font-size:12.5px; margin-bottom:2px; }
-  .mmtooltip .sm{ opacity:.75; font-size:10.5px; }
-  #detail{
-    width:380px; border-left:1px solid var(--glass-border-soft); padding:18px; overflow-y:auto; flex-shrink:0;
-    background:var(--glass-fill); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+  .mmtooltip b{ display:block; margin-bottom:3px; font-family:var(--font-head); font-weight:700; font-size:var(--fs-sub); }
+  .mmtooltip .sm{ opacity:.75; font-size:var(--fs-cap); }
+
+  .node{ cursor:pointer; }
+  .node circle{ stroke:#fff; stroke-width:1.5; transition:opacity var(--d1); }
+  .node:hover circle{ stroke-width:3; }
+  .node text{
+    font-family:var(--font-body); font-size:12px; font-weight:500; fill:var(--ink);
+    paint-order:stroke; stroke:rgba(250,248,242,.92); stroke-width:4px; stroke-linejoin:round;
   }
-  #detail h2{ font-family:var(--font-head); font-weight:700; font-size:18px; margin:0 0 4px; color:var(--accent2); }
-  #detail .empty{ color:var(--sub); font-size:13px; margin-top:40px; text-align:center; }
-  .node circle{ cursor:pointer; transition:r .15s, opacity .15s; }
-  .node text{ font-size:11px; fill:var(--ink); cursor:pointer; font-family:var(--font-body); paint-order:stroke; stroke:var(--bg); stroke-width:3px; }
-  .node.dim{ opacity:.15; }
-  .node.section circle{ fill:var(--saddle); opacity:.9; stroke:var(--line); stroke-width:1; }
+  .node.dim{ opacity:.14; }
+  .node.root circle{ fill:var(--chocolate); stroke-width:4; filter:drop-shadow(0 4px 10px rgba(255,111,89,.5)); }
+  .node.root text{ font-family:var(--font-head); font-weight:700; font-size:15px; }
+  .node.section circle{ fill:var(--saddle); stroke-width:2.5; filter:drop-shadow(0 2px 4px rgba(30,0,14,.22)); }
+  .node.section text{ font-weight:600; }
   .node.section.unsorted circle{ fill:var(--bad); }
-  .node.hub circle{ stroke:var(--line); stroke-width:1.5; }
-  .node.entry circle{ fill:var(--sub); opacity:.55;}
+  .node.hub circle{ fill:var(--accent2); }
+  .node.entry circle{ fill:var(--sub); opacity:.6; stroke-width:1; }
   .node.entry.match circle{ fill:var(--good); opacity:1; }
-  .node.entry.review circle{ fill:var(--bad); opacity:.9; }
-  .node.root circle{ fill:var(--chocolate); }
-  .link{ stroke:rgba(30,0,14,.16); stroke-width:1.2; fill:none; transition:opacity .15s, stroke .15s; }
-  .link.dim{ opacity:.08; }
-  .link.hi{ stroke:var(--accent); stroke-width:2; opacity:1; }
+  .node.entry.review circle{ fill:var(--bad); opacity:.95; }
+  .link{ fill:none; stroke:rgba(30,0,14,.13); stroke-width:1.1; transition:stroke var(--d1), opacity var(--d1); }
+  .link.hi{ stroke:var(--chocolate); stroke-width:2; }
 
-  /* ---- Library (wiki) view ---- */
-  #library{ padding:18px 20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; align-content:start; }
+  /* ---- Detail sheet ---- */
+  .sheet{
+    position:absolute; z-index:6; top:calc(var(--inset-top) + 6px); right:16px; bottom:16px; width:380px;
+    display:flex; flex-direction:column; border-radius:var(--r-xl); overflow:hidden;
+    opacity:0; visibility:hidden; transform:translateX(calc(100% + 32px));
+    transition:transform var(--d3) var(--spring), opacity var(--d2) var(--ease), visibility 0s linear var(--d3);
+  }
+  .sheet.open{ opacity:1; visibility:visible; transform:none; transition:transform var(--d3) var(--spring), opacity var(--d2) var(--ease), visibility 0s; }
+  .sheet .grabber{ display:none; }
+  #detail{ flex:1; min-height:0; display:flex; flex-direction:column; }
+  .sheet-head{ display:flex; align-items:flex-start; gap:8px; padding:18px 12px 12px 22px; }
+  .sheet-head h2{ flex:1; margin:4px 0 0; font-family:var(--font-head); font-weight:700; font-size:var(--fs-t2); line-height:1.25; }
+  .sheet-body{ flex:1; overflow-y:auto; padding:0 22px 24px; }
+  .d-meta{ margin:0 0 12px; color:var(--sub); font-size:var(--fs-sub); line-height:1.5; }
+  .d-note{ margin:0 0 16px; font-size:var(--fs-body); line-height:1.6; }
+  .d-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .editform{ margin-top:12px; padding:16px; border-radius:var(--r-lg); background:rgba(30,0,14,.04); }
+  .field-label{ margin:14px 0 6px; font-size:var(--fs-cap); font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--sub); }
+  .field-label:first-child{ margin-top:0; }
+  .checkgrid{ display:flex; flex-wrap:wrap; gap:8px 16px; }
+  .checkgrid label, .checkrow{ display:inline-flex; align-items:center; gap:8px; font-size:var(--fs-foot); cursor:pointer; }
+  .checkrow{ margin-top:14px; }
+  .list{ margin:0 -10px; }
+  .list-row{
+    position:relative; display:flex; flex-direction:column; gap:3px; width:100%; padding:10px; border:0; border-radius:var(--r-sm);
+    background:none; text-align:left; cursor:pointer; transition:background var(--d1);
+  }
+  .list-row:hover{ background:rgba(30,0,14,.05); }
+  .list-row + .list-row::before{ content:""; position:absolute; top:0; left:10px; right:10px; height:1px; background:var(--line); }
+  .list-row:hover::before, .list-row:hover + .list-row::before{ opacity:0; }
+  .lr-title{ font-size:var(--fs-sub); font-weight:500; line-height:1.4; }
+  .lr-meta{ display:flex; align-items:center; gap:8px; font-size:var(--fs-foot); color:var(--sub); }
+  .help p{ margin:0 0 14px; font-size:var(--fs-sub); line-height:1.6; }
+
+  /* ---- Library ---- */
+  #library{ max-width:1280px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(310px, 1fr)); gap:16px; }
   .card{
-    background:var(--glass-fill-strong); border:1px solid var(--glass-border); border-radius:14px; padding:14px;
-    display:flex; flex-direction:column; gap:6px;
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-soft);
-    transition:transform .15s, box-shadow .15s;
+    display:flex; flex-direction:column; gap:8px; padding:20px 20px 14px; border-radius:var(--r-lg);
+    background:var(--paper); box-shadow:var(--lift-1), var(--hairline), inset 0 1px 0 #fff;
+    transition:transform var(--d3) var(--spring), box-shadow var(--d2) var(--ease);
   }
-  .card:hover{ transform:translateY(-2px); box-shadow:var(--glass-shadow); }
-  .card .title{ font-family:var(--font-head); font-size:15px; font-weight:700; line-height:1.35; color:var(--ink); }
-  .card .meta{ font-size:11.5px; color:var(--sub); }
-  .card .note{ font-size:12px; color:var(--ink); opacity:.85; line-height:1.4; }
-  .tagrow{ display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
-  .tag{ font-size:10px; padding:2px 7px; border-radius:100px; background:rgba(120,132,117,.25); color:var(--saddle); }
-  .tag.geo{ background:rgba(247,208,138,.2); color:var(--accent2); }
-  .cardfoot{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:8px; flex-wrap:wrap; }
-  .openbtn{ font-size:11.5px; padding:5px 10px; border-radius:8px; background:linear-gradient(135deg, var(--chocolate), var(--accent2)); color:var(--on-accent); text-decoration:none; font-weight:700; border:none; cursor:pointer; font-family:var(--font-body); box-shadow:0 3px 10px rgba(255,111,89,.3); }
-  .openbtn.ext{ background:var(--glass-fill-strong); border:1px solid var(--glass-border); color:var(--ink); box-shadow:var(--glass-shadow-soft); }
-  .newtab-mini{ font-size:14px; color:var(--sub); text-decoration:none; padding:4px 6px; }
-  .newtab-mini:hover{ color:var(--accent); }
-  select.status{
-    font-size:11px; padding:4px 6px; border-radius:7px; border:1px solid var(--glass-border); background:var(--glass-fill-strong); color:var(--ink); font-family:var(--font-body);
+  .card:hover{ transform:translateY(-3px); box-shadow:var(--lift-2), var(--hairline), inset 0 1px 0 #fff; }
+  .card-eyebrow{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-size:var(--fs-cap); font-weight:600; letter-spacing:.06em; color:var(--sub); font-variant-numeric:tabular-nums;
   }
-  .badge{ font-size:9.5px; padding:2px 6px; border-radius:5px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; }
-  .badge.done{ background:rgba(165,255,214,.18); color:var(--good); }
-  .badge.pdf{ background:rgba(247,208,138,.2); color:var(--accent2); }
-  .badge.ext{ background:rgba(255,111,89,.18); color:var(--bad); }
-  .badge.review{ background:rgba(255,111,89,.25); color:var(--bad); }
+  .card-title{ margin:0; font-family:var(--font-head); font-weight:700; font-size:var(--fs-t3); line-height:1.3; }
+  .card-meta{ font-size:var(--fs-foot); color:var(--sub); line-height:1.45; }
+  .card-note{ margin:0; font-size:var(--fs-sub); line-height:1.55; }
+  .card .tagrow{ margin:2px 0 6px; }
+  .card-foot{ display:flex; align-items:center; gap:6px; margin-top:auto; padding-top:12px; border-top:1px solid var(--line); }
+  .spacer{ flex:1; }
 
-  /* ---- Table view ---- */
-  #tablewrap{ padding:16px 20px; }
-  table{
-    width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px;
-    background:var(--glass-fill-strong); border:1px solid var(--glass-border); border-radius:14px; overflow:hidden;
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-soft);
+  /* ---- Table ---- */
+  #view-table.active{ display:flex; flex-direction:column; overflow:hidden; }
+  #view-table .view-head{ width:100%; flex:none; }
+  .table-card{
+    flex:1; min-height:0; width:100%; max-width:1400px; margin:0 auto; overflow:auto; border-radius:var(--r-lg);
+    background:var(--paper); box-shadow:var(--lift-1), var(--hairline);
   }
-  th{ text-align:left; color:var(--accent2); font-weight:700; font-family:var(--font-head); padding:8px 10px; border-bottom:1px solid var(--glass-border-soft); position:sticky; top:0; background:var(--glass-fill-strong); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); cursor:pointer; }
-  td{ padding:8px 10px; border-bottom:1px solid var(--glass-border-soft); vertical-align:top; }
-  tr:hover td{ background:rgba(255,255,255,.35); }
-  td.t-title{ max-width:280px; }
-  td a{ color:var(--accent); font-weight:700; cursor:pointer; }
+  table{ width:100%; min-width:960px; border-collapse:separate; border-spacing:0; font-size:var(--fs-sub); }
+  th{
+    position:sticky; top:0; z-index:2; padding:12px 14px; text-align:left; white-space:nowrap; user-select:none;
+    font-size:var(--fs-cap); font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--sub);
+    background:rgba(255,255,255,.86); -webkit-backdrop-filter:var(--mat-blur); backdrop-filter:var(--mat-blur);
+    border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  th:not([data-k]){ cursor:default; }
+  th[data-k]:hover, th.sorted{ color:var(--ink); }
+  th.sorted::after{ content:" ↑"; color:var(--chocolate); }
+  th.sorted.desc::after{ content:" ↓"; }
+  td{ padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.45; }
+  tbody tr:last-child td{ border-bottom:0; }
+  tbody tr{ transition:background var(--d1); }
+  tbody tr:hover{ background:rgba(255,111,89,.05); }
+  td.t-year{ color:var(--sub); font-variant-numeric:tabular-nums; }
+  td.t-auth{ min-width:140px; }
+  td.t-title{ min-width:240px; max-width:360px; font-weight:600; }
+  td.t-sub{ color:var(--sub); }
+  .rowacts{ display:flex; align-items:center; gap:2px; }
 
-  /* ---- Bibliography view ---- */
-  .biblio-actions{
-    padding:14px 20px; border-bottom:1px solid var(--glass-border-soft); display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    background:var(--glass-fill); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+  /* ---- Bibliography ---- */
+  #view-biblio .view-head{ max-width:860px; }
+  .biblio-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .paper{
+    max-width:860px; margin:0 auto; padding:44px 56px 56px; border-radius:var(--r-xl);
+    background:var(--paper); box-shadow:var(--lift-2), var(--hairline);
+    font-size:var(--fs-body); line-height:1.75;
   }
-  .biblio-actions .hint{ font-size:11.5px; color:var(--sub); }
-  #biblioContent{
-    margin:14px 20px 60px; padding:16px 24px; font-size:13.5px; line-height:1.8; max-width:900px;
-    background:var(--glass-fill-strong); border:1px solid var(--glass-border); border-radius:14px;
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-soft);
+  #biblioContent h3{
+    display:flex; align-items:center; gap:10px; margin:36px 0 12px; padding-bottom:10px; border-bottom:1px solid var(--line);
+    font-family:var(--font-head); font-weight:700; font-size:var(--fs-t3);
   }
-  #biblioContent h3{ font-family:var(--font-head); font-weight:700; color:var(--accent2); font-size:16px; margin:26px 0 10px; border-bottom:1px solid var(--glass-border-soft); padding-bottom:6px; }
-  #biblioContent p{ margin:0 0 10px; padding-left:26px; text-indent:-26px; }
-  #biblioContent p .rev{ color:var(--bad); font-weight:700; font-size:10.5px; text-transform:uppercase; margin-left:6px; }
+  #biblioContent h3:first-child{ margin-top:0; }
+  #biblioContent h3 .count{
+    padding:2px 9px; border-radius:var(--r-pill); background:var(--tint-ink);
+    font-family:var(--font-body); font-size:var(--fs-cap); font-weight:600; color:var(--sub);
+  }
+  #biblioContent p{ margin:0 0 10px; padding-left:28px; text-indent:-28px; overflow-wrap:anywhere; }
+  #biblioContent p .badge{ margin-left:8px; vertical-align:1px; }
 
-  /* ---- Modal viewer ---- */
-  .modal-overlay{ position:fixed; inset:0; background:rgba(30,0,14,.45); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:80; }
+  /* ---- Viewer modal ---- */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(30,0,14,.28); -webkit-backdrop-filter:blur(10px) saturate(120%); backdrop-filter:blur(10px) saturate(120%);
+    animation:fadeIn var(--d2) var(--ease);
+  }
   .modal-overlay.hidden{ display:none; }
   .modal-box{
-    background:var(--glass-fill-strong); width:min(1150px,94vw); height:min(88vh,920px); border-radius:18px; overflow:hidden;
-    display:flex; flex-direction:column; border:1px solid var(--glass-border);
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-    box-shadow:0 24px 70px rgba(30,0,14,.35), inset 0 1px 0 rgba(255,255,255,.6);
+    width:min(1180px, 100%); height:min(90vh, 940px); display:flex; flex-direction:column; padding:8px; border-radius:var(--r-xl);
+    box-shadow:var(--lift-3), var(--sheen); animation:sheetIn var(--d3) var(--spring);
   }
-  .modal-head{ display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid var(--glass-border-soft); gap:12px; }
-  .modal-head .mtitle{ font-family:var(--font-head); font-weight:700; font-size:14.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .modal-head .acts{ display:flex; gap:6px; align-items:center; flex-shrink:0; }
-  .modal-frame{ flex:1; border:0; width:100%; background:#fff; }
-  .modal-fallback{ padding:24px; font-size:13px; color:var(--sub); }
+  .modal-head{ display:flex; align-items:center; gap:10px; padding:2px 2px 10px; }
+  .mtitle{ flex:1; min-width:0; font-family:var(--font-head); font-weight:700; font-size:var(--fs-callout); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .modal-frame{ flex:1; width:100%; border:0; border-radius:calc(var(--r-xl) - 8px); background:#fff; box-shadow:var(--hairline); }
+  @keyframes fadeIn{ from{ opacity:0; } }
+  @keyframes sheetIn{ from{ opacity:0; transform:scale(.94) translateY(14px); } }
 
-  /* ---- Settings panel ---- */
-  .settings-box{
-    background:var(--glass-fill-strong); width:min(480px,92vw); border-radius:18px; padding:20px; border:1px solid var(--glass-border);
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-    box-shadow:0 24px 70px rgba(30,0,14,.35), inset 0 1px 0 rgba(255,255,255,.6);
-  }
-  .settings-box h3{ font-family:var(--font-head); margin:0 0 4px; font-size:17px; }
-  .settings-box .sub{ font-size:12px; color:var(--sub); margin-bottom:16px; }
-  .settings-box label{ font-size:11.5px; color:var(--sub); display:block; margin:12px 0 4px; text-transform:uppercase; letter-spacing:.5px; }
-  .settings-box input{ width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--glass-border); background:var(--glass-fill); font-size:13px; font-family:var(--font-body); }
-  .settings-box .row{ display:flex; gap:8px; margin-top:18px; }
-  .settings-box .status{ font-size:11.5px; margin-top:10px; color:var(--sub); }
-
-  ::-webkit-scrollbar{ width:9px; height:9px; }
-  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:6px; }
-
-  /* ---- Mobile ---- */
+  /* ================= MOBILE ================= */
   @media (max-width: 768px){
-    header{ padding:10px 12px; gap:8px; }
-    h1{ font-size:16px; }
-    h1 span{ display:none; }
+    .chrome{ gap:8px; padding:max(10px, env(safe-area-inset-top)) 10px 0; }
+    .chrome-row.top{ gap:8px; }
+    .brand{ flex:1 1 0; padding-right:14px; }
+    .brand-name{ font-size:var(--fs-callout); }
+    .sync-label{ display:none; }
+    .sync{ padding:0 8px; }
+    .search{ order:3; flex:1 1 100%; }
+    #filterToggle{ display:grid; }
+    .filters-row{ display:none; }
+    body.filters-open .filters-row{ display:flex; }
     .stat{ display:none; }
-    .filters{ padding:6px 12px; }
-    .mmToolbar{ padding:6px 12px; gap:8px; }
-    .mmLegend{ display:none; }
-    .mmZoom{ margin-left:auto; }
 
-    #mindmap-wrap{ flex-direction:column; }
-    #svgHost{ height:58vh; flex:none; }
-    #detail{
-      width:100%; flex:1; min-height:0; border-left:none; border-top:1px solid var(--line);
-      padding:14px;
+    #viewTabs{
+      position:fixed; left:10px; right:10px; bottom:max(10px, env(safe-area-inset-bottom)); z-index:55;
+      height:64px; gap:0; padding:5px;
     }
-    #detail .empty{ margin-top:12px; font-size:12px; }
+    #viewTabs .seg-item{ flex:1; flex-direction:column; justify-content:center; gap:3px; padding:0 4px; font-size:10.5px; }
+    #viewTabs .seg-item .ic{ width:22px; height:22px; }
+    #viewTabs .lbl{ display:none; }
+    #viewTabs .lbl-short{ display:inline; }
+    .scroll-edge.bottom{ display:block; }
 
-    .modal-box{ width:100vw; height:100vh; border-radius:0; }
-    .biblio-actions{ padding:10px 12px; }
-    #biblioContent{ padding:8px 14px 40px; }
-    #library{ padding:12px; grid-template-columns:1fr; }
-    #tablewrap{ padding:10px; }
+    .view{ padding:calc(var(--inset-top) + 16px) 12px calc(var(--inset-bottom) + 28px); }
+    .view-head{ margin-bottom:16px; }
+    .view-head h2{ font-size:26px; }
+    #library{ grid-template-columns:1fr; gap:12px; }
+    .paper{ padding:26px 20px 32px; border-radius:var(--r-lg); }
+
+    .mm-modes{ left:10px; }
+    .mm-legend{ display:none; }
+    .mm-zoom{ right:10px; bottom:calc(var(--inset-bottom) + 12px); }
+    #mindmap-wrap.sheet-open .mm-zoom{ right:10px; opacity:0; pointer-events:none; }
+    .sheet{
+      top:auto; left:8px; right:8px; bottom:calc(var(--inset-bottom) + 8px); width:auto; max-height:58vh;
+      transform:translateY(calc(100% + 40px));
+    }
+    .sheet .grabber{ display:block; flex:none; width:38px; height:5px; margin:8px auto 0; border-radius:3px; background:rgba(30,0,14,.2); }
+    .sheet-head{ padding-top:8px; }
+
+    .filterpop{
+      position:fixed; top:auto; left:10px; right:10px; bottom:calc(var(--inset-bottom) + 10px);
+      max-width:none; max-height:55vh; padding:8px; border-radius:var(--r-xl);
+      transform:translateY(24px); transform-origin:bottom center;
+    }
+    .filterpop label{ padding:12px 10px; }
+
+    .modal-overlay{ padding:0; }
+    .modal-box{ width:100%; height:100%; border-radius:0; padding:max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
+    .modal-frame{ border-radius:var(--r-md); }
+  }
+  @media (max-width: 420px){ .brand-tail{ display:none; } }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
   }
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <h1>🧠 Classroom Catalytics Library <span id="countline"></span></h1>
-    <div class="tabs">
-      <div class="tab active" data-view="mindmap">Mind Map</div>
-      <div class="tab" data-view="library">Wiki / Library</div>
-      <div class="tab" data-view="table">Lit-Review Table</div>
-      <div class="tab" data-view="biblio">Bibliography</div>
-    </div>
-    <div class="search"><input id="search" placeholder="Search title, author, note…"></div>
-    <div class="stat"><b id="matchcount">0</b> / <span id="totalcount">0</span> sources</div>
-    <div class="syncbar"><span class="syncdot" id="syncDot"></span><span id="syncLabel">Not connected</span></div>
-    <div class="iconbtn" id="driveBtn" title="Open the Drive folder">📁</div>
-    <div class="iconbtn" id="syncBtn" title="Just added files to Drive? Click to sync — it also checks automatically every couple of minutes and whenever you switch back to this tab.">🔄</div>
-  </header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-spark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3M6 6l2.1 2.1M15.9 15.9 18 18M6 18l2.1-2.1M15.9 8.1 18 6"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.6"/><circle cx="5" cy="6" r="1.8"/><circle cx="19" cy="6" r="1.8"/><circle cx="12" cy="20" r="1.8"/><path d="M10 10.3 6.4 7.3M14 10.3l3.6-3M12 14.6v3.6"/></symbol>
+  <symbol id="i-library" viewBox="0 0 24 24"><rect x="3.5" y="4" width="7" height="7" rx="2"/><rect x="13.5" y="4" width="7" height="7" rx="2"/><rect x="3.5" y="14" width="7" height="7" rx="2"/><rect x="13.5" y="14" width="7" height="7" rx="2"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M3.5 14.5h17M9.5 9.5v10"/></symbol>
+  <symbol id="i-biblio" viewBox="0 0 24 24"><path d="M14 3.5H7.5A1.5 1.5 0 0 0 6 5v14a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19V7.5z"/><path d="M14 3.5v4h4M9 12h6M9 15.5h6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.6l2 2h7.4a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M13.5 5.5h5v5M18.5 5.5 11 13"/><path d="M17 14v3.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 5 17.5v-9A1.5 1.5 0 0 1 6.5 7H10"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5.5 12h13"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4.5 9V5.5a1 1 0 0 1 1-1H9M15 4.5h3.5a1 1 0 0 1 1 1V9M19.5 15v3.5a1 1 0 0 1-1 1H15M9 19.5H5.5a1 1 0 0 1-1-1V15"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.2"/></symbol>
+  <symbol id="i-radial" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/></symbol>
+  <symbol id="i-network" viewBox="0 0 24 24"><circle cx="6" cy="7" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="17" r="2.5"/><circle cx="19.5" cy="15.5" r="1.5"/><path d="m7.1 8.8 3.6 6M17 7.8l-3.8 7M8 6.8l8-.6M14.5 16.6l3.5-.8"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4.5v10M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="m15.5 5.5 3 3L9 18H6v-3z"/></symbol>
+</svg>
 
-  <div class="filters" id="filterBar"></div>
+<div class="ambient"></div>
 
-  <main>
-    <div class="view active" id="view-mindmap">
-      <div class="mmToolbar">
-        <div class="tabs" id="mmModeTabs">
-          <div class="tab active" data-mode="radial">🌳 Radial Map</div>
-          <div class="tab" data-mode="network">🕸 Concept Network</div>
-        </div>
-        <div class="mmZoom">
-          <div class="iconbtn" id="mmZoomOut" title="Zoom out">−</div>
-          <div class="iconbtn" id="mmZoomReset" title="Reset view">⤢</div>
-          <div class="iconbtn" id="mmZoomIn" title="Zoom in">+</div>
-        </div>
-        <div class="mmLegend" id="mmLegend"></div>
+<main>
+  <section class="view active" id="view-mindmap">
+    <div id="mindmap-wrap">
+      <div id="svgHost"></div>
+      <div id="mmTooltip" class="mmtooltip glass dark hidden"></div>
+      <div class="mm-float mm-modes seg glass" id="mmModeTabs">
+        <span class="seg-lens"></span>
+        <button class="seg-item active" data-mode="radial"><svg class="ic"><use href="#i-radial"/></svg>Radial map</button>
+        <button class="seg-item" data-mode="network"><svg class="ic"><use href="#i-network"/></svg>Concept network</button>
       </div>
-      <div id="mindmap-wrap">
-        <div id="svgHost"></div>
-        <div id="mmTooltip" class="mmtooltip hidden"></div>
-        <div id="detail"><div class="empty">Click a node to see details here.<br><br><b>Radial Map:</b> inner ring = bibliography sections (red = needs review), outer dots = sources.<br><br><b>Concept Network:</b> large hubs = constructs (e.g. burnout, morale), small dots = sources linked to whichever construct(s) they cover.<br><br>Scroll to zoom, drag to pan, hover any node for a quick preview.</div></div>
-      </div>
-    </div>
-    <div class="view" id="view-library"><div id="library"></div></div>
-    <div class="view" id="view-table">
-      <div id="tablewrap">
-        <table id="datatable">
-          <thead><tr>
-            <th data-k="year">Year</th><th data-k="authors">Authors</th><th data-k="title">Title</th>
-            <th data-k="section_name">Section</th><th data-k="geography">Geography</th>
-            <th data-k="method">Method</th><th data-k="construct">Construct</th><th data-k="access_type">Access</th><th>Link</th>
-          </tr></thead>
-          <tbody id="tbody"></tbody>
-        </table>
+      <div class="mm-float mm-legend glass" id="mmLegend"></div>
+      <aside class="sheet glass thick" id="detailSheet" aria-label="Details">
+        <div class="grabber"></div>
+        <div id="detail"></div>
+      </aside>
+      <div class="mm-float mm-zoom glass">
+        <button class="iconbtn" id="mmZoomIn" title="Zoom in" aria-label="Zoom in"><svg class="ic"><use href="#i-plus"/></svg></button>
+        <button class="iconbtn" id="mmZoomOut" title="Zoom out" aria-label="Zoom out"><svg class="ic"><use href="#i-minus"/></svg></button>
+        <button class="iconbtn" id="mmZoomReset" title="Fit to screen" aria-label="Fit to screen"><svg class="ic"><use href="#i-fit"/></svg></button>
+        <div class="sep"></div>
+        <button class="iconbtn" id="mmHelp" title="How to read the map" aria-label="How to read the map"><svg class="ic"><use href="#i-info"/></svg></button>
       </div>
     </div>
-    <div class="view" id="view-biblio">
+  </section>
+
+  <section class="view" id="view-library">
+    <header class="view-head"><div>
+      <h2>Library</h2>
+      <p>Every source as a card. Track what you've read and open any paper without leaving the page.</p>
+    </div></header>
+    <div id="library"></div>
+  </section>
+
+  <section class="view" id="view-table">
+    <header class="view-head"><div>
+      <h2>Literature review</h2>
+      <p>The whole collection at a glance. Click a column heading to sort.</p>
+    </div></header>
+    <div class="table-card">
+      <table id="datatable">
+        <thead><tr>
+          <th data-k="year">Year</th><th data-k="authors">Authors</th><th data-k="title">Title</th>
+          <th data-k="section_name">Section</th><th data-k="geography">Geography</th>
+          <th data-k="method">Method</th><th data-k="construct">Construct</th><th data-k="access_type">Access</th><th>Source</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="view" id="view-biblio">
+    <header class="view-head">
+      <div>
+        <h2>Bibliography</h2>
+        <p>Formatted from whatever is currently filtered and synced. Clear the filters for the full list.</p>
+      </div>
       <div class="biblio-actions">
-        <button class="openbtn" id="dlMd">⬇ Download as Markdown (.md)</button>
-        <button class="openbtn ext" id="dlDoc">⬇ Download as Word (.doc)</button>
-        <span class="hint">Regenerates from whatever is currently filtered/synced — clear filters first for the full bibliography.</span>
+        <button class="btn primary" id="dlMd"><svg class="ic"><use href="#i-download"/></svg>Markdown</button>
+        <button class="btn" id="dlDoc"><svg class="ic"><use href="#i-download"/></svg>Word</button>
       </div>
-      <div id="biblioContent"></div>
+    </header>
+    <article id="biblioContent" class="paper"></article>
+  </section>
+
+  <div class="scroll-edge"></div>
+  <div class="scroll-edge bottom"></div>
+</main>
+
+<div class="chrome" id="chrome">
+  <div class="chrome-row top">
+    <div class="brand glass">
+      <span class="brand-mark"><svg class="ic"><use href="#i-spark"/></svg></span>
+      <h1 class="brand-name">Classroom Catalytics<span class="brand-tail"> Library</span></h1>
     </div>
-  </main>
+    <nav class="seg glass" id="viewTabs" aria-label="Views">
+      <span class="seg-lens"></span>
+      <button class="seg-item active" data-view="mindmap"><svg class="ic"><use href="#i-map"/></svg><span class="lbl">Mind Map</span><span class="lbl-short">Map</span></button>
+      <button class="seg-item" data-view="library"><svg class="ic"><use href="#i-library"/></svg><span class="lbl">Library</span><span class="lbl-short">Library</span></button>
+      <button class="seg-item" data-view="table"><svg class="ic"><use href="#i-table"/></svg><span class="lbl">Lit-Review Table</span><span class="lbl-short">Table</span></button>
+      <button class="seg-item" data-view="biblio"><svg class="ic"><use href="#i-biblio"/></svg><span class="lbl">Bibliography</span><span class="lbl-short">Cite</span></button>
+    </nav>
+    <div class="search glass">
+      <svg class="ic"><use href="#i-search"/></svg>
+      <input id="search" type="search" placeholder="Search title, author, note…" aria-label="Search sources">
+      <button class="iconbtn sm" id="filterToggle" type="button" title="Filters" aria-label="Filters"><svg class="ic"><use href="#i-sliders"/></svg><span class="dotcount" id="filterCount"></span></button>
+    </div>
+    <div class="actions glass">
+      <div class="sync"><span class="syncdot" id="syncDot"></span><span class="sync-label" id="syncLabel">Not connected</span></div>
+      <button class="iconbtn" id="driveBtn" title="Open the Drive folder" aria-label="Open the Drive folder"><svg class="ic"><use href="#i-folder"/></svg></button>
+      <button class="iconbtn" id="syncBtn" title="Just added files to Drive? Click to sync — it also checks automatically every couple of minutes and whenever you switch back to this tab." aria-label="Sync now"><svg class="ic"><use href="#i-refresh"/></svg></button>
+    </div>
+  </div>
+  <div class="chrome-row filters-row">
+    <div id="filterBar"></div>
+    <div class="stat glass"><b id="matchcount">0</b> of <span id="totalcount">0</span> sources</div>
+  </div>
 </div>
 
-<!-- Viewer modal -->
 <div class="modal-overlay hidden" id="viewerModal">
-  <div class="modal-box">
+  <div class="modal-box glass thick" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-head">
+      <button class="iconbtn" id="modalClose" title="Close" aria-label="Close"><svg class="ic"><use href="#i-close"/></svg></button>
       <div class="mtitle" id="modalTitle">—</div>
-      <div class="acts">
-        <a class="openbtn ext" id="modalNewTab" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
-        <div class="iconbtn" id="modalClose">✕</div>
-      </div>
+      <a class="btn sm" id="modalNewTab" href="#" target="_blank" rel="noopener"><svg class="ic"><use href="#i-external"/></svg>Open in new tab</a>
     </div>
-    <iframe class="modal-frame" id="modalFrame"></iframe>
+    <iframe class="modal-frame" id="modalFrame" title="Source viewer"></iframe>
   </div>
 </div>
 
@@ -625,13 +930,59 @@ document.getElementById("driveBtn").onclick = ()=>{
   modalNewTab.href = `https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}`;
   viewerModal.classList.remove("hidden");
 };
-document.getElementById("modalClose").onclick = ()=>{ viewerModal.classList.add("hidden"); modalFrame.src="about:blank"; };
-viewerModal.onclick = (e)=>{ if(e.target===viewerModal){ viewerModal.classList.add("hidden"); modalFrame.src="about:blank"; } };
+function closeModal(){ viewerModal.classList.add("hidden"); modalFrame.src="about:blank"; }
+document.getElementById("modalClose").onclick = closeModal;
+viewerModal.onclick = (e)=>{ if(e.target===viewerModal) closeModal(); };
+
+const detailSheet = document.getElementById("detailSheet");
+const mmWrap = document.getElementById("mindmap-wrap");
+function openSheet(){ detailSheet.classList.add("open"); mmWrap.classList.add("sheet-open"); }
+function closeSheet(){ detailSheet.classList.remove("open"); mmWrap.classList.remove("sheet-open"); }
+
 document.addEventListener("keydown", e=>{
-  if(e.key==="Escape"){
-    viewerModal.classList.add("hidden"); modalFrame.src="about:blank";
-  }
+  if(e.key!=="Escape") return;
+  if(!viewerModal.classList.contains("hidden")) closeModal();
+  else if(detailSheet.classList.contains("open")) closeSheet();
 });
+
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+/* ===================== LAYOUT: FLOATING CHROME ===================== */
+// Content runs full-bleed beneath the floating controls, so views and the map
+// need to know how much of the viewport the chrome covers at the top and bottom.
+const chromeEl = document.getElementById("chrome");
+const viewTabsEl = document.getElementById("viewTabs");
+const mobileMQ = window.matchMedia("(max-width: 768px)");
+const insets = { top:0, bottom:0 };
+function updateInsets(){
+  insets.top = Math.round(chromeEl.getBoundingClientRect().bottom);
+  insets.bottom = mobileMQ.matches ? Math.round(window.innerHeight - viewTabsEl.getBoundingClientRect().top) : 0;
+  const rs = document.documentElement.style;
+  rs.setProperty("--inset-top", insets.top+"px");
+  rs.setProperty("--inset-bottom", insets.bottom+"px");
+}
+function syncLens(seg){
+  const lens = seg.querySelector(".seg-lens"), a = seg.querySelector(".seg-item.active");
+  if(!lens || !a || !a.offsetWidth) return;
+  lens.style.width = a.offsetWidth+"px";
+  lens.style.height = a.offsetHeight+"px";
+  lens.style.transform = `translate(${a.offsetLeft}px, ${a.offsetTop}px)`;
+  if(!seg.classList.contains("ready")) requestAnimationFrame(()=>seg.classList.add("ready"));
+}
+function syncAllLenses(){ document.querySelectorAll(".seg").forEach(syncLens); }
+function relayout(){ updateInsets(); syncAllLenses(); }
+new ResizeObserver(relayout).observe(chromeEl);
+window.addEventListener("resize", relayout);
+if(document.fonts) document.fonts.ready.then(relayout);
+updateInsets();
+
+document.getElementById("filterToggle").onclick = (ev)=>{
+  ev.stopPropagation();
+  document.body.classList.toggle("filters-open");
+  relayout();
+};
 
 /* ===================== FILTER STATE ===================== */
 const state = { theme:new Set(), geography:new Set(), method:new Set(), construct:new Set(), access_type:new Set(), q:"" };
@@ -663,12 +1014,12 @@ function buildFilterBar(){
   FILTER_FIELDS.forEach(({key,label})=>{
     const vals = [...new Set(LIVE_SOURCES.map(s=>Array.isArray(s[key])?s[key]:[s[key]]).flat().filter(Boolean))].sort();
     const wrap = document.createElement("div");
-    wrap.style.position = "relative";
+    wrap.className = "fwrap";
 
-    const btn = document.createElement("div");
+    const btn = document.createElement("button");
     const n = state[key].size;
-    btn.className = "filterbtn" + (n?" active":"");
-    btn.innerHTML = `${label}${n?` <span class="n">${n}</span>`:""} <span class="caret">▾</span>`;
+    btn.className = "filterbtn glass" + (n?" active":"") + (openFilterField===key?" open":"");
+    btn.innerHTML = `${label}${n?`<span class="n">${n}</span>`:""}<svg class="ic chev"><use href="#i-chevron"/></svg>`;
     btn.onclick = (ev)=>{
       ev.stopPropagation();
       openFilterField = (openFilterField===key) ? null : key;
@@ -677,7 +1028,7 @@ function buildFilterBar(){
     wrap.appendChild(btn);
 
     const pop = document.createElement("div");
-    pop.className = "filterpop" + (openFilterField===key ? " open":"");
+    pop.className = "filterpop glass thick" + (openFilterField===key ? " open":"");
     pop.dataset.field = key;
     pop.onclick = (ev)=>ev.stopPropagation();
     vals.forEach(v=>{
@@ -695,11 +1046,13 @@ function buildFilterBar(){
     });
     const foot = document.createElement("div");
     foot.className = "popfoot";
-    const clearSpan = document.createElement("span");
-    clearSpan.textContent = "clear";
+    const clearSpan = document.createElement("button");
+    clearSpan.className = "btn sm";
+    clearSpan.textContent = "Clear";
     clearSpan.onclick = ()=>{ state[key].clear(); render(); };
-    const doneSpan = document.createElement("span");
-    doneSpan.textContent = "done";
+    const doneSpan = document.createElement("button");
+    doneSpan.className = "btn sm primary";
+    doneSpan.textContent = "Done";
     doneSpan.onclick = ()=>{ openFilterField = null; renderFilterPopStates(); };
     foot.appendChild(clearSpan); foot.appendChild(doneSpan);
     pop.appendChild(foot);
@@ -708,12 +1061,17 @@ function buildFilterBar(){
     bar.appendChild(wrap);
   });
 
-  const anyActive = FILTER_FIELDS.some(f=>state[f.key].size) || state.q;
+  const activeCount = FILTER_FIELDS.reduce((n,f)=>n+state[f.key].size, 0);
+  const fc = document.getElementById("filterCount");
+  fc.textContent = activeCount || "";
+  fc.classList.toggle("on", activeCount>0);
+
+  const anyActive = activeCount || state.q;
   if(anyActive){
-    const clearAll = document.createElement("div");
-    clearAll.className = "clearbtn";
+    const clearAll = document.createElement("button");
+    clearAll.className = "clearbtn glass";
     clearAll.id = "clearFilters";
-    clearAll.textContent = "clear all filters";
+    clearAll.textContent = "Clear all";
     clearAll.onclick = ()=>{
       FILTER_FIELDS.forEach(f=>state[f.key].clear());
       document.getElementById("search").value="";
@@ -725,7 +1083,9 @@ function buildFilterBar(){
 }
 function renderFilterPopStates(){
   document.querySelectorAll(".filterpop").forEach(p=>{
-    p.classList.toggle("open", p.dataset.field===openFilterField);
+    const on = p.dataset.field===openFilterField;
+    p.classList.toggle("open", on);
+    p.parentElement.querySelector(".filterbtn").classList.toggle("open", on);
   });
 }
 document.addEventListener("click", ()=>{
@@ -734,14 +1094,29 @@ document.addEventListener("click", ()=>{
 
 document.getElementById("search").oninput = (e)=>{ state.q = e.target.value.toLowerCase(); render(); };
 
-document.querySelectorAll(".tab").forEach(t=>{
+document.querySelectorAll("#viewTabs .seg-item").forEach(t=>{
   t.onclick = ()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
-    t.classList.add("active");
-    document.getElementById("view-"+t.dataset.view).classList.add("active");
+    document.querySelectorAll("#viewTabs .seg-item").forEach(x=>x.classList.toggle("active", x===t));
+    document.querySelectorAll(".view").forEach(x=>x.classList.toggle("active", x.id==="view-"+t.dataset.view));
+    syncAllLenses();
   };
 });
+
+function tagsHtml(e){
+  const tags = [];
+  themesOf(e).filter(t=>t!=="unsorted").forEach(t=>tags.push(`<span class="tag t-theme">${esc(LABELS.theme[t]||t)}</span>`));
+  if(e.geography && e.geography!=="unsorted") tags.push(`<span class="tag t-geo">${esc(LABELS.geography[e.geography]||e.geography)}</span>`);
+  if(e.method && e.method!=="unsorted") tags.push(`<span class="tag t-method">${esc(LABELS.method[e.method]||e.method)}</span>`);
+  if(e.construct && e.construct!=="unsorted") tags.push(`<span class="tag t-construct">${esc(LABELS.construct[e.construct]||e.construct)}</span>`);
+  return tags.length ? tags.join("") : `<span class="tag muted">Untagged</span>`;
+}
+function badgeHtml(e){
+  if(e.needs_review) return '<span class="badge review">Needs review</span>';
+  if(e.drive_pdf || e.local_file) return '<span class="badge pdf">Archived</span>';
+  if(e.access_type==='book'||e.access_type==='paywalled') return '<span class="badge ext">External only</span>';
+  return '<span class="badge done">Catalogued</span>';
+}
+const EXT_ICON = '<svg class="ic"><use href="#i-external"/></svg>';
 
 function linkFor(e){
   const s = bestSrc(e);
@@ -758,37 +1133,27 @@ function renderLibrary(list){
     const card = document.createElement("div");
     card.className = "card";
     const link = linkFor(e);
-    let badge;
-    if(e.needs_review) badge = '<span class="badge review">Needs Review</span>';
-    else if(e.drive_pdf || e.local_file) badge = '<span class="badge pdf">Archived</span>';
-    else if(e.access_type==='book'||e.access_type==='paywalled') badge = '<span class="badge ext">External Only</span>';
-    else badge = '<span class="badge done">Catalogued</span>';
     card.innerHTML = `
-      <div class="title">${e.title}</div>
-      <div class="meta">${e.authors||"—"} ${e.year?("· "+e.year):""} · <i>${e.venue||""}</i></div>
-      <div class="note">${e.note||""}</div>
-      <div class="tagrow">
-        ${themesOf(e).map(t=>`<span class="tag">${(LABELS.theme[t]||t)}</span>`).join("")}
-        <span class="tag geo">${LABELS.geography[e.geography]||e.geography}</span>
-        <span class="tag">${LABELS.method[e.method]||e.method}</span>
-        <span class="tag">${LABELS.construct[e.construct]||e.construct}</span>
-      </div>
-      <div class="cardfoot">
-        <div>${badge}</div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <select class="status" data-id="${e.id}">
-            <option value="unread">Unread</option>
-            <option value="reading">Reading</option>
-            <option value="studied">Studied</option>
-          </select>
-          ${link ? `<button class="openbtn">Open</button><a class="newtab-mini" href="${link.ext_href}" target="_blank" title="Open in new tab">↗</a>` : ""}
-        </div>
+      <div class="card-eyebrow"><span>${esc(e.year||"n.d.")}</span>${badgeHtml(e)}</div>
+      <h3 class="card-title">${esc(e.title)}</h3>
+      <div class="card-meta">${esc(e.authors||"Unknown author")}${e.venue?` · <i>${esc(e.venue)}</i>`:""}</div>
+      ${e.note?`<p class="card-note">${esc(e.note)}</p>`:""}
+      <div class="tagrow">${tagsHtml(e)}</div>
+      <div class="card-foot">
+        <select class="status" aria-label="Reading status">
+          <option value="unread">Unread</option>
+          <option value="reading">Reading</option>
+          <option value="studied">Studied</option>
+        </select>
+        <span class="spacer"></span>
+        ${link ? `<a class="iconbtn sm" href="${esc(link.ext_href)}" target="_blank" rel="noopener" title="Open in new tab" aria-label="Open in new tab">${EXT_ICON}</a><button class="btn primary sm" data-open>Open</button>` : ""}
       </div>
     `;
     const sel = card.querySelector("select.status");
     sel.value = studyStatus[e.id] || "unread";
-    sel.onchange = ()=>{ studyStatus[e.id]=sel.value; saveStudy(studyStatus); };
-    const openBtn = card.querySelector(".openbtn");
+    sel.dataset.state = sel.value;
+    sel.onchange = ()=>{ studyStatus[e.id]=sel.value; sel.dataset.state=sel.value; saveStudy(studyStatus); };
+    const openBtn = card.querySelector("[data-open]");
     if(openBtn) openBtn.onclick = ()=> openViewer(e);
     host.appendChild(card);
   });
@@ -802,17 +1167,17 @@ function renderTable(list){
     const link = linkFor(e);
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${e.year||"—"}</td>
-      <td>${e.authors||"—"}</td>
-      <td class="t-title">${e.title}${e.needs_review?' <span class="badge review">New</span>':''}</td>
-      <td>${e.section_name}</td>
-      <td>${LABELS.geography[e.geography]||e.geography}</td>
-      <td>${LABELS.method[e.method]||e.method}</td>
-      <td>${LABELS.construct[e.construct]||e.construct}</td>
-      <td>${LABELS.access_type[e.access_type]||e.access_type}</td>
-      <td>${link?`<a data-open="1">open</a> · <a href="${link.ext_href}" target="_blank">↗</a>`:"—"}</td>
+      <td class="t-year">${esc(e.year||"—")}</td>
+      <td class="t-auth">${esc(e.authors||"—")}</td>
+      <td class="t-title">${esc(e.title)}${e.needs_review?' <span class="badge review">New</span>':''}</td>
+      <td class="t-sub">${esc(e.section_name)}</td>
+      <td class="t-sub">${esc(LABELS.geography[e.geography]||e.geography)}</td>
+      <td class="t-sub">${esc(LABELS.method[e.method]||e.method)}</td>
+      <td class="t-sub">${esc(LABELS.construct[e.construct]||e.construct)}</td>
+      <td class="t-sub">${esc(LABELS.access_type[e.access_type]||e.access_type)}</td>
+      <td>${link?`<div class="rowacts"><button class="btn sm" data-open>Open</button><a class="iconbtn sm" href="${esc(link.ext_href)}" target="_blank" rel="noopener" title="Open in new tab" aria-label="Open in new tab">${EXT_ICON}</a></div>`:"—"}</td>
     `;
-    if(link) tr.querySelector('a[data-open]').onclick = ()=> openViewer(e);
+    if(link) tr.querySelector('[data-open]').onclick = ()=> openViewer(e);
     tbody.appendChild(tr);
   });
 }
@@ -828,18 +1193,24 @@ const dragState = { active:false, lastX:0, lastY:0, zoomGroup:null, host:null };
 // centered and scaled to fill the viewport with a little padding — replaces the old
 // "always start at scale 1, origin 0,0" default, which left content off-center and
 // zoomed out on both desktop and (especially) narrower mobile viewports.
+// The canvas is full-bleed, so fit into the band left uncovered by the floating
+// chrome, the mode switch (top) and the legend/zoom controls (bottom).
+function visibleBand(hostRect){
+  const top = insets.top + 60, bottom = insets.bottom + 70;
+  return { top, height: Math.max(120, hostRect.height - top - bottom) };
+}
 function fitToView(host, zoomGroup){
   const hostRect = host.getBoundingClientRect();
   if(hostRect.width < 2 || hostRect.height < 2) return;
   let bbox;
   try{ bbox = zoomGroup.getBBox(); }catch(e){ return; }
   if(!bbox || bbox.width === 0 || bbox.height === 0) return;
-  const pad = 0.88;
-  const rawScale = Math.min(hostRect.width/bbox.width, hostRect.height/bbox.height) * pad;
+  const band = visibleBand(hostRect);
+  const rawScale = Math.min((hostRect.width-32)/bbox.width, band.height/bbox.height) * 0.94;
   const scale = Math.min(2.2, Math.max(0.12, rawScale));
   zoomState.scale = scale;
   zoomState.tx = hostRect.width/2 - (bbox.x + bbox.width/2)*scale;
-  zoomState.ty = hostRect.height/2 - (bbox.y + bbox.height/2)*scale;
+  zoomState.ty = band.top + band.height/2 - (bbox.y + bbox.height/2)*scale;
 }
 
 function attachZoomPan(svg, zoomGroup, host){
@@ -912,19 +1283,31 @@ window.addEventListener("mouseup", ()=>{
   if(dragState.host) dragState.host.classList.remove("grabbing");
 });
 function resetZoom(){
-  zoomNeedsFit = true;
   const host = document.getElementById("svgHost");
-  if(host && host._mmApplyZoom) host._mmApplyZoom();
+  const g = host.querySelector(".zoomGroup");
+  if(g && host._mmApplyZoom){ fitToView(host, g); host._mmApplyZoom(); }
 }
-document.getElementById("mmZoomIn").onclick = ()=>{ zoomState.scale = Math.min(4, zoomState.scale*1.25); document.getElementById("svgHost")._mmApplyZoom(); };
-document.getElementById("mmZoomOut").onclick = ()=>{ zoomState.scale = Math.max(0.2, zoomState.scale/1.25); document.getElementById("svgHost")._mmApplyZoom(); };
+function zoomBy(factor){
+  const host = document.getElementById("svgHost");
+  if(!host._mmApplyZoom) return;
+  const r = host.getBoundingClientRect(), band = visibleBand(r);
+  const mx = r.width/2, my = band.top + band.height/2;
+  const s = Math.min(4, Math.max(0.12, zoomState.scale*factor));
+  zoomState.tx = mx - (mx-zoomState.tx)*(s/zoomState.scale);
+  zoomState.ty = my - (my-zoomState.ty)*(s/zoomState.scale);
+  zoomState.scale = s;
+  host._mmApplyZoom();
+}
+document.getElementById("mmZoomIn").onclick = ()=> zoomBy(1.25);
+document.getElementById("mmZoomOut").onclick = ()=> zoomBy(1/1.25);
 document.getElementById("mmZoomReset").onclick = resetZoom;
-document.querySelectorAll("#mmModeTabs .tab").forEach(t=>{
+document.getElementById("mmHelp").onclick = ()=> showHelp();
+document.querySelectorAll("#mmModeTabs .seg-item").forEach(t=>{
   t.onclick = ()=>{
-    document.querySelectorAll("#mmModeTabs .tab").forEach(x=>x.classList.remove("active"));
-    t.classList.add("active");
+    document.querySelectorAll("#mmModeTabs .seg-item").forEach(x=>x.classList.toggle("active", x===t));
+    syncLens(document.getElementById("mmModeTabs"));
     mmMode = t.dataset.mode;
-    resetZoom();
+    zoomNeedsFit = true;
     render();
   };
 });
@@ -975,10 +1358,10 @@ function renderMindmap(list){
 
   const linkEls = {}; // childId -> path el (for highlight)
   const nodeEls = {}; // id -> group el (for focus-dim)
-  function addLink(id, x1,y1,x2,y2){
+  function addLink(id, x1,y1,x2,y2, d){
     const p = document.createElementNS(NS,"path");
     p.setAttribute("class","link");
-    p.setAttribute("d",`M${x1},${y1} L${x2},${y2}`);
+    p.setAttribute("d", d || `M${x1},${y1} L${x2},${y2}`);
     zoomGroup.appendChild(p);
     linkEls[id] = p;
     return p;
@@ -990,7 +1373,7 @@ function renderMindmap(list){
   function clearFocus(){
     Object.values(nodeEls).forEach(el=>el.classList.remove("dim"));
   }
-  function addNode(id, x,y,r,cls,label,onclick,hoverHtml,linkChain){
+  function addNode(id, x,y,r,cls,label,onclick,hoverHtml,linkChain,labelLeft){
     const g = document.createElementNS(NS,"g");
     g.setAttribute("class","node "+cls);
     g.setAttribute("transform",`translate(${x},${y})`);
@@ -999,7 +1382,8 @@ function renderMindmap(list){
     g.appendChild(c);
     if(label){
       const t = document.createElementNS(NS,"text");
-      t.setAttribute("x", r+4); t.setAttribute("y", 3);
+      t.setAttribute("x", labelLeft ? -(r+6) : r+6); t.setAttribute("y", 4);
+      if(labelLeft) t.setAttribute("text-anchor","end");
       t.textContent = label;
       g.appendChild(t);
     }
@@ -1036,21 +1420,23 @@ function renderMindmap(list){
     const secCls = secId===0 ? "section unsorted" : "section";
     addNode("sec"+secId, sx,sy,9,secCls, (secId===0?"⚑ ":(i+1)+". ")+short,
       ()=>showDetail({type:"section", id:secId, name:secName, entries}),
-      `<b>${secName}</b><span class="sm">${entries.length} sources — click for list</span>`,
-      ["sec"+secId]);
+      `<b>${esc(secName)}</b><span class="sm">${entries.length} sources — click for list</span>`,
+      ["sec"+secId], Math.cos(a) < -0.01);
 
     const spread = Math.min(0.9, entries.length*0.14);
     entries.forEach((e,j)=>{
       const ea = a - spread/2 + (entries.length>1 ? (spread*(j/(entries.length-1))) : 0);
       const r2 = R1 + 55 + (j%3)*14;
       const ex = cx + r2*Math.cos(ea), ey = cy + r2*Math.sin(ea);
+      const rm = (R1 + r2)/2;
+      const curve = `M${sx},${sy} Q${cx + rm*Math.cos(a)},${cy + rm*Math.sin(a)} ${ex},${ey}`;
       const linkId = "e"+e.id;
-      addLink(linkId, sx,sy,ex,ey);
+      addLink(linkId, sx,sy,ex,ey, curve);
       const isMatch = matchIds.has(e.id);
       const cls = "entry"+(isMatch?" match":"")+(e.needs_review?" review":"");
       addNode(linkId, ex,ey, isMatch||e.needs_review?4.5:3, cls, null,
         ()=>showDetail({type:"entry", entry:e}),
-        `<b>${e.title.length>70?e.title.slice(0,68)+"…":e.title}</b><span class="sm">${e.authors||"—"} ${e.year?("· "+e.year):""}</span>`,
+        `<b>${esc(e.title.length>70?e.title.slice(0,68)+"…":e.title)}</b><span class="sm">${esc(e.authors||"—")} ${e.year?("· "+esc(e.year)):""}</span>`,
         ["sec"+secId, linkId]);
     });
   });
@@ -1170,8 +1556,8 @@ function renderNetwork(list){
       g.appendChild(t);
     }
     const hoverHtml = n.type==="hub"
-      ? `<b>${n.label}</b><span class="sm">${sources.filter(s=>s.construct===n.construct).length} sources</span>`
-      : `<b>${n.entry.title.length>70?n.entry.title.slice(0,68)+"…":n.entry.title}</b><span class="sm">${n.entry.authors||"—"} ${n.entry.year?("· "+n.entry.year):""}</span>`;
+      ? `<b>${esc(n.label)}</b><span class="sm">${sources.filter(s=>s.construct===n.construct).length} sources</span>`
+      : `<b>${esc(n.entry.title.length>70?n.entry.title.slice(0,68)+"…":n.entry.title)}</b><span class="sm">${esc(n.entry.authors||"—")} ${n.entry.year?("· "+esc(n.entry.year)):""}</span>`;
     g.addEventListener("mouseenter", (ev)=>{
       showTooltip(ev, hoverHtml);
       (linkEls[n.id]||[]).forEach(p=>p.classList.add("hi"));
@@ -1199,61 +1585,69 @@ function renderNetwork(list){
   renderLegend("network");
 }
 
-function showDetail(payload){
+function sheetHead(titleHtml){
+  return `<div class="sheet-head"><h2>${titleHtml}</h2><button class="iconbtn" data-close title="Close" aria-label="Close"><svg class="ic"><use href="#i-close"/></svg></button></div>`;
+}
+function mountSheet(html){
   const d = document.getElementById("detail");
+  d.innerHTML = html;
+  d.querySelector("[data-close]").onclick = closeSheet;
+  openSheet();
+  return d;
+}
+function showHelp(){
+  mountSheet(sheetHead("Reading the map") + `<div class="sheet-body help">
+    <p><b>Radial map.</b> The centre is the library. The inner ring holds the bibliography sections (red means it needs review), and the outer dots are individual sources.</p>
+    <p><b>Concept network.</b> The large hubs are constructs such as burnout or morale. Each source links to the construct it covers.</p>
+    <p>Scroll or pinch to zoom, drag to pan, hover a node for a preview, and click it for full details.</p>
+  </div>`);
+}
+function showDetail(payload){
   if(payload.type==="entry"){
     const e = payload.entry;
     const link = linkFor(e);
-    d.innerHTML = `
-      <h2>${e.title}</h2>
-      <div class="meta" style="color:var(--sub);font-size:12px;margin-bottom:8px;">${e.authors||"—"} ${e.year?("· "+e.year):""} · <i>${e.venue||""}</i></div>
-      <div class="note" style="font-size:13px;line-height:1.5;margin-bottom:10px;">${e.note||""}</div>
-      <div class="tagrow" id="tagDisplay">
-        ${themesOf(e).map(t=>`<span class="tag">${(LABELS.theme[t]||t)}</span>`).join("")}
-        <span class="tag geo">${LABELS.geography[e.geography]||e.geography}</span>
-        <span class="tag">${LABELS.method[e.method]||e.method}</span>
-        <span class="tag">${LABELS.construct[e.construct]||e.construct}</span>
-        ${e.needs_review?'<span class="badge review">Needs Review</span>':''}
-      </div>
-      <div style="margin-top:8px;"><span id="editToggle" style="font-size:11.5px;color:var(--accent);cursor:pointer;text-decoration:underline;">✎ Correct tags</span></div>
-      <div id="editForm" style="display:none;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);"></div>
-      ${link?`<div style="margin-top:14px;display:flex;gap:8px;"><button class="openbtn" id="detailOpen">Open here</button><a class="openbtn ext" href="${link.ext_href}" target="_blank">Open in new tab ↗</a></div>`:""}
-    `;
-    if(link) document.getElementById("detailOpen").onclick = ()=> openViewer(e);
+    const d = mountSheet(sheetHead(esc(e.title)) + `<div class="sheet-body">
+      <p class="d-meta">${esc(e.authors||"Unknown author")}${e.year?` · ${esc(e.year)}`:""}${e.venue?` · <i>${esc(e.venue)}</i>`:""}</p>
+      ${e.note?`<p class="d-note">${esc(e.note)}</p>`:""}
+      <div class="tagrow">${tagsHtml(e)}${e.needs_review?'<span class="badge review">Needs review</span>':''}</div>
+      ${link?`<div class="d-actions"><button class="btn primary" id="detailOpen">Open here</button><a class="btn" href="${esc(link.ext_href)}" target="_blank" rel="noopener">${EXT_ICON}New tab</a></div>`:""}
+      <button class="textlink" id="editToggle"><svg class="ic"><use href="#i-edit"/></svg>Correct tags</button>
+      <div class="editform" id="editForm" hidden></div>
+    </div>`);
+    if(link) d.querySelector("#detailOpen").onclick = ()=> openViewer(e);
 
-    document.getElementById("editToggle").onclick = ()=>{
-      const form = document.getElementById("editForm");
-      const opts = (dict, cur)=> Object.entries(dict).map(([k,v])=>`<option value="${k}" ${k===cur?"selected":""}>${v}</option>`).join("");
+    d.querySelector("#editToggle").onclick = ()=>{
+      const form = d.querySelector("#editForm");
+      if(!form.hidden){ form.hidden = true; return; }
+      const opts = (dict, cur)=> Object.entries(dict).map(([k,v])=>`<option value="${esc(k)}" ${k===cur?"selected":""}>${esc(v)}</option>`).join("");
       const themeChecks = Object.entries(LABELS.theme).map(([k,v])=>
-        `<label style="display:inline-flex;align-items:center;gap:4px;margin:2px 8px 2px 0;font-size:11.5px;">
-          <input type="checkbox" value="${k}" ${themesOf(e).includes(k)?"checked":""}> ${v}
-        </label>`).join("");
+        `<label><input type="checkbox" value="${esc(k)}" ${themesOf(e).includes(k)?"checked":""}>${esc(v)}</label>`).join("");
       form.innerHTML = `
-        <div style="font-size:10.5px;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Theme (multi-select)</div>
-        <div id="themeChecks" style="margin-bottom:10px;">${themeChecks}</div>
-        <div style="font-size:10.5px;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Geography</div>
-        <select id="fGeo" style="width:100%;margin-bottom:10px;padding:6px;border-radius:6px;border:1px solid var(--line);font-family:var(--font-body);">${opts(LABELS.geography, e.geography)}</select>
-        <div style="font-size:10.5px;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Method</div>
-        <select id="fMethod" style="width:100%;margin-bottom:10px;padding:6px;border-radius:6px;border:1px solid var(--line);font-family:var(--font-body);">${opts(LABELS.method, e.method)}</select>
-        <div style="font-size:10.5px;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Construct</div>
-        <select id="fConstruct" style="width:100%;margin-bottom:10px;padding:6px;border-radius:6px;border:1px solid var(--line);font-family:var(--font-body);">${opts(LABELS.construct, e.construct)}</select>
-        ${e.needs_review?`<label style="display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:10px;"><input type="checkbox" id="fClearReview" checked> Mark as reviewed (remove "Needs Review" flag)</label>`:""}
-        <div style="display:flex;gap:8px;">
-          <button class="openbtn" id="fSave">Save correction</button>
-          <button class="openbtn ext" id="fCancel">Cancel</button>
+        <div class="field-label">Theme</div>
+        <div class="checkgrid" id="themeChecks">${themeChecks}</div>
+        <div class="field-label">Geography</div>
+        <select class="full" id="fGeo">${opts(LABELS.geography, e.geography)}</select>
+        <div class="field-label">Method</div>
+        <select class="full" id="fMethod">${opts(LABELS.method, e.method)}</select>
+        <div class="field-label">Construct</div>
+        <select class="full" id="fConstruct">${opts(LABELS.construct, e.construct)}</select>
+        ${e.needs_review?`<label class="checkrow"><input type="checkbox" id="fClearReview" checked>Mark as reviewed</label>`:""}
+        <div class="d-actions">
+          <button class="btn primary sm" id="fSave">Save correction</button>
+          <button class="btn sm" id="fCancel">Cancel</button>
         </div>
       `;
-      form.style.display = "block";
-      document.getElementById("fCancel").onclick = ()=>{ form.style.display="none"; };
-      document.getElementById("fSave").onclick = ()=>{
+      form.hidden = false;
+      form.querySelector("#fCancel").onclick = ()=>{ form.hidden = true; };
+      form.querySelector("#fSave").onclick = ()=>{
         const theme = [...form.querySelectorAll('#themeChecks input:checked')].map(i=>i.value);
         const patch = {
           theme: theme.length?theme:["unsorted"],
-          geography: document.getElementById("fGeo").value,
-          method: document.getElementById("fMethod").value,
-          construct: document.getElementById("fConstruct").value
+          geography: form.querySelector("#fGeo").value,
+          method: form.querySelector("#fMethod").value,
+          construct: form.querySelector("#fConstruct").value
         };
-        const clearReview = document.getElementById("fClearReview");
+        const clearReview = form.querySelector("#fClearReview");
         if(clearReview && clearReview.checked) patch.needs_review = false;
         overrides[e.id] = Object.assign({}, overrides[e.id]||{}, patch);
         saveOverrides(overrides);
@@ -1263,13 +1657,15 @@ function showDetail(payload){
       };
     };
   } else {
-    d.innerHTML = `
-      <h2>${payload.name}</h2>
-      <div class="meta" style="margin-bottom:10px;">${payload.entries.length} sources in this section</div>
-      ${payload.entries.map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;cursor:pointer;" data-id="${e.id}">
-        <b>${e.authors||"—"}</b> (${e.year||"n.d."}) — ${e.title}${e.needs_review?' <span class="badge review">New</span>':''}
-      </div>`).join("")}
-    `;
+    const d = mountSheet(sheetHead(esc(payload.name)) + `<div class="sheet-body">
+      <p class="d-meta">${payload.entries.length} sources</p>
+      <div class="list">${payload.entries.map(e=>`
+        <button class="list-row" data-id="${esc(e.id)}">
+          <span class="lr-title">${esc(e.title)}</span>
+          <span class="lr-meta">${esc(e.authors||"Unknown author")} · ${esc(e.year||"n.d.")}${e.needs_review?'<span class="badge review">New</span>':''}</span>
+        </button>`).join("")}
+      </div>
+    </div>`);
     d.querySelectorAll("[data-id]").forEach(row=>{
       row.onclick = ()=>{
         const e = LIVE_SOURCES.find(x=>String(x.id)===row.dataset.id);
@@ -1301,8 +1697,8 @@ function renderBibliography(list){
   const host = document.getElementById("biblioContent");
   const groups = buildBibliographyGroups(list);
   host.innerHTML = groups.map(g=>`
-    <h3>${g.name}</h3>
-    ${g.items.map(e=>`<p>${formatReference(e)}${e.needs_review?'<span class="rev">needs review</span>':''}</p>`).join("")}
+    <h3>${esc(g.name)}<span class="count">${g.items.length}</span></h3>
+    ${g.items.map(e=>`<p>${esc(formatReference(e))}${e.needs_review?'<span class="badge review">Needs review</span>':''}</p>`).join("")}
   `).join("");
 }
 function bibliographyMarkdown(list){
@@ -1381,6 +1777,9 @@ document.querySelectorAll("#datatable th[data-k]").forEach(th=>{
     const k = th.dataset.k;
     sortAsc = (sortKey===k) ? !sortAsc : true;
     sortKey = k;
+    document.querySelectorAll("#datatable th").forEach(x=>x.classList.remove("sorted","desc"));
+    th.classList.add("sorted");
+    th.classList.toggle("desc", !sortAsc);
     LIVE_SOURCES.sort((a,b)=>{
       const av=(a[k]??""), bv=(b[k]??"");
       if(av<bv) return sortAsc?-1:1;
