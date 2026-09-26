@@ -4,97 +4,94 @@
 <meta charset="UTF-8">
 <title>Classroom Catalytics Library</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#faf8f2">
+<meta name="theme-color" content="#f5f5f7">
 <style>
+  /* Inter (SIL OFL, see fonts/OFL-Inter.txt): variable weight + optical size, so large titles get the display cut automatically */
   @font-face{
-    font-family:"Marcellus"; font-style:normal; font-weight:400; font-display:swap;
-    src:url("fonts/marcellus-regular.woff2") format("woff2");
+    font-family:"Inter"; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url("fonts/inter-latin.woff2") format("woff2");
+    unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face{
-    font-family:"Google Sans"; font-style:normal; font-weight:400 700; font-display:swap;
-    src:url("fonts/googlesans-normal.woff2") format("woff2");
+    font-family:"Inter"; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url("fonts/inter-latin-ext.woff2") format("woff2");
+    unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face{
-    font-family:"Google Sans"; font-style:italic; font-weight:400 700; font-display:swap;
-    src:url("fonts/googlesans-italic.woff2") format("woff2");
+    font-family:"Inter"; font-style:italic; font-weight:100 900; font-display:swap;
+    src:url("fonts/inter-italic-latin.woff2") format("woff2");
+    unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  @font-face{
+    font-family:"Inter"; font-style:italic; font-weight:100 900; font-display:swap;
+    src:url("fonts/inter-italic-latin-ext.woff2") format("woff2");
+    unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
 
   /* ================= TOKENS ================= */
   :root{
-    /* ---- 1. Palette: the five brand colours, by name ---- */
-    --coffee-bean:#1e000e;
-    --dusty-olive:#788475;
-    --vibrant-coral:#ff6f59;
-    --apricot-cream:#f7d08a;
-    --aquamarine:#a5ffd6;
-    --light:#ffffff;              /* the "light" glass refracts — not a brand colour */
+    /* system colours: neutral clear glass, vivid light behind it, one blue for action */
+    --blue:#0071e3; --blue-light:#2997ff; --blue-deep:#0058b0;
+    --indigo:#5e5ce6; --purple:#af52de; --pink:#ff2d55; --cyan:#64d2ff;
+    --red:#ff3b30; --orange:#ff9500; --green:#34c759; --teal:#30b0c7;
+    --light:#ffffff;
 
-    /* ---- 2. Tonal steps, each on its brand colour's hue ---- */
-    --coral-200:#ffb8aa; --coral-300:#ff8b79;
-    --coral-600:#e04e38; --coral-700:#c9432f; --coral-800:#a3321f;
-    --apricot-50:#faf8f2; --apricot-600:#b9791c; --apricot-800:#744d0e;
-    --olive-700:#5c6a55; --olive-800:#434f3d;
-    --aqua-600:#1f9d6f; --aqua-800:#0d6444;
+    /* darker steps that keep small text AA-readable on the matching tint */
+    --red-text:#d70015; --orange-text:#a64b00; --green-text:#1a7431; --purple-text:#8944ab;
+    --indigo-text:#3634a3; --teal-text:#006b8f; --blue-text:#0058b0;
 
-    /* neutrals are Coffee Bean at fixed opacities, so greys stay warm */
-    --ink-a4:color-mix(in srgb, var(--coffee-bean) 4%, transparent);
-    --ink-a6:color-mix(in srgb, var(--coffee-bean) 6%, transparent);
-    --ink-a8:color-mix(in srgb, var(--coffee-bean) 8%, transparent);
-    --ink-a10:color-mix(in srgb, var(--coffee-bean) 9%, transparent);
-    --ink-a14:color-mix(in srgb, var(--coffee-bean) 13%, transparent);
-    --ink-a16:color-mix(in srgb, var(--coffee-bean) 16%, transparent);
-    --ink-a22:color-mix(in srgb, var(--coffee-bean) 22%, transparent);
-    --ink-a26:color-mix(in srgb, var(--coffee-bean) 26%, transparent);
-    --ink-a42:color-mix(in srgb, var(--coffee-bean) 42%, transparent);
+    --ink-a4:rgba(0,0,0,.04); --ink-a6:rgba(0,0,0,.05); --ink-a8:rgba(0,0,0,.07); --ink-a10:rgba(0,0,0,.09);
+    --ink-a14:rgba(0,0,0,.12); --ink-a16:rgba(0,0,0,.14); --ink-a22:rgba(0,0,0,.2); --ink-a26:rgba(0,0,0,.22); --ink-a42:rgba(0,0,0,.36);
 
-    /* ---- 3. Roles: components only ever use these ---- */
-    --bg:var(--apricot-50);
-    --ink:var(--coffee-bean);
-    --sub:var(--olive-700);                 /* secondary text, 5.8:1 on white */
+    /* roles */
+    --bg:#f5f5f7;
+    --ink:#1d1d1f;
+    --sub:#6e6e73;
     --line:var(--ink-a10);
-    --accent:var(--vibrant-coral);          /* primary action, selection, brand */
-    --on-accent:var(--coffee-bean);         /* 7:1 on coral; white would fail */
-    --good:var(--aqua-600);                 /* live / matches / done */
-    --bad:var(--coral-700);                 /* needs review / errors */
-    --focus-ring:color-mix(in srgb, var(--vibrant-coral) 30%, transparent);
-    --accent-glow:color-mix(in srgb, var(--vibrant-coral) 50%, transparent);
-    --accent-wash:color-mix(in srgb, var(--vibrant-coral) 5%, transparent);
+    --accent:var(--blue);
+    --on-accent:var(--light);
+    --good:var(--green);
+    --bad:var(--red-text);
+    --focus-ring:color-mix(in srgb, var(--blue) 35%, transparent);
+    --accent-glow:color-mix(in srgb, var(--blue) 45%, transparent);
+    --accent-wash:color-mix(in srgb, var(--blue) 5%, transparent);
 
-    /* tag + status tints: soft fill, with a darker step of the same hue that stays AA-readable on it */
-    --tint-coral:color-mix(in srgb, var(--vibrant-coral) 15%, transparent);   --on-tint-coral:var(--coral-800);
-    --tint-apricot:color-mix(in srgb, var(--apricot-cream) 45%, transparent); --on-tint-apricot:var(--apricot-800);
-    --tint-olive:color-mix(in srgb, var(--dusty-olive) 17%, transparent);     --on-tint-olive:var(--olive-800);
-    --tint-aqua:color-mix(in srgb, var(--aquamarine) 55%, transparent);       --on-tint-aqua:var(--aqua-800);
+    --tint-blue:color-mix(in srgb, var(--blue) 12%, transparent);     --on-tint-blue:var(--blue-text);
+    --tint-red:color-mix(in srgb, var(--red) 13%, transparent);       --on-tint-red:var(--red-text);
+    --tint-orange:color-mix(in srgb, var(--orange) 16%, transparent); --on-tint-orange:var(--orange-text);
+    --tint-green:color-mix(in srgb, var(--green) 16%, transparent);   --on-tint-green:var(--green-text);
+    --tint-purple:color-mix(in srgb, var(--purple) 13%, transparent); --on-tint-purple:var(--purple-text);
+    --tint-indigo:color-mix(in srgb, var(--indigo) 13%, transparent); --on-tint-indigo:var(--indigo-text);
+    --tint-teal:color-mix(in srgb, var(--teal) 15%, transparent);     --on-tint-teal:var(--teal-text);
     --tint-ink:var(--ink-a6);
 
-    /* map + legend share these, so the key always matches the nodes */
-    --map-root:var(--vibrant-coral);
-    --map-section:var(--dusty-olive);
-    --map-hub:var(--apricot-600);
-    --map-source:var(--olive-700);
-    --map-match:var(--aqua-600);
-    --map-review:var(--coral-700);
+    --map-root:var(--blue);
+    --map-section:var(--indigo);
+    --map-hub:var(--purple);
+    --map-source:#86868b;
+    --map-match:#248a3d;
+    --map-review:var(--red);
 
-    /* ambient light behind the glass: all five brand colours, softened */
+    /* vivid light behind the glass, like an iOS wallpaper, softened for legibility */
     --ambient:
-      radial-gradient(60vmax 50vmax at 0% 0%, color-mix(in srgb, var(--vibrant-coral) 24%, transparent), transparent 60%),
-      radial-gradient(55vmax 50vmax at 100% 0%, color-mix(in srgb, var(--aquamarine) 42%, transparent), transparent 60%),
-      radial-gradient(60vmax 55vmax at 8% 100%, color-mix(in srgb, var(--apricot-cream) 46%, transparent), transparent 60%),
-      radial-gradient(55vmax 55vmax at 100% 100%, color-mix(in srgb, var(--dusty-olive) 24%, transparent), transparent 60%),
+      radial-gradient(60vmax 50vmax at 0% 0%, color-mix(in srgb, var(--blue-light) 34%, transparent), transparent 60%),
+      radial-gradient(55vmax 50vmax at 100% 0%, color-mix(in srgb, var(--purple) 26%, transparent), transparent 60%),
+      radial-gradient(60vmax 55vmax at 8% 100%, color-mix(in srgb, var(--cyan) 34%, transparent), transparent 60%),
+      radial-gradient(55vmax 55vmax at 100% 100%, color-mix(in srgb, var(--pink) 18%, transparent), transparent 60%),
       var(--bg);
 
     /* materials */
     --mat-blur:blur(24px) saturate(190%);
-    --mat-regular:color-mix(in srgb, var(--light) 56%, transparent);
-    --mat-thick:color-mix(in srgb, var(--light) 78%, transparent);
-    --mat-lens:color-mix(in srgb, var(--light) 94%, transparent);
-    --mat-dark:color-mix(in srgb, var(--coffee-bean) 70%, transparent);
-    --paper:color-mix(in srgb, var(--light) 90%, transparent);
-    --rim:linear-gradient(150deg, color-mix(in srgb, var(--light) 95%, transparent), color-mix(in srgb, var(--light) 20%, transparent) 32%, transparent 55%, color-mix(in srgb, var(--light) 55%, transparent));
-    --sheen:inset 0 1px 0 color-mix(in srgb, var(--light) 75%, transparent), inset 0 -10px 20px -14px color-mix(in srgb, var(--light) 70%, transparent);
+    --mat-regular:rgba(255,255,255,.55);
+    --mat-thick:rgba(255,255,255,.78);
+    --mat-lens:rgba(255,255,255,.94);
+    --mat-dark:rgba(29,29,31,.72);
+    --paper:rgba(255,255,255,.9);
+    --rim:linear-gradient(150deg, rgba(255,255,255,.95), rgba(255,255,255,.2) 32%, transparent 55%, rgba(255,255,255,.55));
+    --sheen:inset 0 1px 0 rgba(255,255,255,.75), inset 0 -10px 20px -14px rgba(255,255,255,.7);
     --hairline:inset 0 0 0 .5px var(--ink-a8);
 
-    /* elevation: shadows are Coffee Bean too, never pure black */
+    /* elevation */
     --lift-1:0 1px 2px var(--ink-a6), 0 6px 18px -6px var(--ink-a16);
     --lift-2:0 2px 4px var(--ink-a6), 0 16px 40px -12px var(--ink-a26);
     --lift-3:0 4px 10px var(--ink-a6), 0 32px 80px -20px var(--ink-a42);
@@ -103,13 +100,10 @@
     --r-sm:12px; --r-md:16px; --r-lg:22px; --r-xl:28px; --r-pill:999px;
     --control:36px; --control-sm:30px; --bar:calc(var(--control) + 8px);
 
-    /* type: Marcellus (display) + Google Sans (text).
-       Both share ~0.5em x-height and ~0.71em cap height, so they sit together at equal sizes. */
-    --font-head:"Marcellus", Georgia, "Times New Roman", serif;
-    --font-body:"Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    /* type */
+    --font-display:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-body:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --fs-cap:11px; --fs-foot:12px; --fs-sub:13px; --fs-body:14px; --fs-callout:15px; --fs-t3:17px; --fs-t2:20px; --fs-t1:30px;
-    /* Marcellus ships one weight; headings get a controlled stroke instead of the browser's smeared faux-bold */
-    --display-weight:.022em;
 
     /* motion */
     --ease:cubic-bezier(.2,.8,.2,1);
@@ -121,17 +115,18 @@
   }
   @media (pointer:coarse){ :root{ --control:42px; --control-sm:36px; } }
   @media (prefers-reduced-transparency: reduce){
-    :root{ --mat-regular:color-mix(in srgb, var(--light) 97%, transparent); --mat-thick:var(--light); --mat-lens:var(--light); --mat-dark:var(--coffee-bean); --paper:var(--light); }
+    :root{ --mat-regular:rgba(255,255,255,.97); --mat-thick:var(--light); --mat-lens:var(--light); --mat-dark:#1d1d1f; --paper:var(--light); }
   }
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-    :root{ --mat-regular:color-mix(in srgb, var(--light) 95%, transparent); --mat-thick:color-mix(in srgb, var(--light) 98%, transparent); --mat-dark:color-mix(in srgb, var(--coffee-bean) 94%, transparent); }
+    :root{ --mat-regular:rgba(255,255,255,.95); --mat-thick:rgba(255,255,255,.98); --mat-dark:rgba(29,29,31,.94); }
   }
 
-  /* one rule for every Marcellus heading */
+  /* headings: bold Inter with tighter tracking as size grows (SF-style) */
   .brand-name, .view-head h2, .sheet-head h2, .card-title, #biblioContent h3, .mtitle{
-    font-family:var(--font-head); font-weight:400; font-synthesis:none;
-    -webkit-text-stroke:var(--display-weight) currentColor; letter-spacing:.01em;
+    font-family:var(--font-display); font-weight:700; letter-spacing:-.017em;
   }
+  .view-head h2{ letter-spacing:-.025em; }
+  .card-title, .mtitle, #biblioContent h3{ font-weight:650; }
   .view-head h2, .sheet-head h2, .card-title, #biblioContent h3{ text-wrap:balance; }
   .card-note, .d-note, .view-head p, .help p{ text-wrap:pretty; }
 
@@ -194,15 +189,15 @@
   .btn:active{ transform:scale(.96); }
   .btn .ic{ width:16px; height:16px; }
   .btn.primary{
-    background:linear-gradient(180deg, var(--coral-300), var(--accent)); color:var(--on-accent); font-weight:600;
-    box-shadow:0 1px 2px color-mix(in srgb, var(--coral-800) 25%, transparent), 0 6px 16px -6px color-mix(in srgb, var(--vibrant-coral) 75%, transparent),
-               inset 0 1px 0 color-mix(in srgb, var(--light) 55%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--coral-800) 20%, transparent);
+    background:linear-gradient(180deg, var(--blue-light), var(--accent)); color:var(--on-accent); font-weight:600;
+    box-shadow:0 1px 2px color-mix(in srgb, var(--blue-deep) 25%, transparent), 0 6px 16px -6px var(--accent-glow),
+               inset 0 1px 0 color-mix(in srgb, var(--light) 55%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--blue-deep) 25%, transparent);
   }
   .btn.sm{ height:var(--control-sm); padding:0 12px; font-size:var(--fs-foot); }
 
   .textlink{
     display:inline-flex; align-items:center; gap:6px; margin-top:16px; padding:0; border:0; background:none; cursor:pointer;
-    color:var(--on-tint-coral); font-size:var(--fs-foot); font-weight:600;
+    color:var(--on-tint-blue); font-size:var(--fs-foot); font-weight:600;
   }
   .textlink .ic{ width:15px; height:15px; }
 
@@ -212,19 +207,19 @@
     transition:background-color var(--d1), box-shadow var(--d1);
   }
   input[type=checkbox]:checked{
-    background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e000e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/14px no-repeat;
-    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--coral-800) 35%, transparent);
+    background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/14px no-repeat;
+    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--blue-deep) 35%, transparent);
   }
   select{
     -webkit-appearance:none; appearance:none; height:var(--control-sm); padding:0 30px 0 12px; border:0; border-radius:var(--r-pill);
     font:inherit; font-size:var(--fs-foot); font-weight:500; color:var(--ink); cursor:pointer;
-    background:var(--ink-a6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c6a55' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E") right 10px center/14px no-repeat;
+    background:var(--ink-a6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E") right 10px center/14px no-repeat;
     transition:background-color var(--d1);
   }
   select:hover{ background-color:var(--ink-a10); }
   select.full{ width:100%; height:var(--control); border-radius:var(--r-sm); background-color:var(--light); box-shadow:var(--hairline); }
-  select.status[data-state=reading]{ background-color:var(--tint-apricot); color:var(--on-tint-apricot); }
-  select.status[data-state=studied]{ background-color:var(--tint-aqua); color:var(--on-tint-aqua); }
+  select.status[data-state=reading]{ background-color:var(--tint-orange); color:var(--on-tint-orange); }
+  select.status[data-state=studied]{ background-color:var(--tint-green); color:var(--on-tint-green); }
 
   /* segmented control: a lifted lens slides beneath the active item */
   .seg{ display:flex; align-items:stretch; gap:2px; height:var(--bar); padding:4px; border-radius:var(--r-pill); }
@@ -248,11 +243,11 @@
   .tag{
     display:inline-flex; align-items:center; height:22px; padding:0 9px; border-radius:var(--r-pill);
     font-size:var(--fs-cap); font-weight:500; white-space:nowrap;
-    background:var(--tint-olive); color:var(--on-tint-olive);
+    background:var(--tint-teal); color:var(--on-tint-teal);
   }
-  .tag.t-theme{ background:var(--tint-coral); color:var(--on-tint-coral); }
-  .tag.t-geo{ background:var(--tint-apricot); color:var(--on-tint-apricot); }
-  .tag.t-construct{ background:var(--tint-aqua); color:var(--on-tint-aqua); }
+  .tag.t-theme{ background:var(--tint-purple); color:var(--on-tint-purple); }
+  .tag.t-geo{ background:var(--tint-orange); color:var(--on-tint-orange); }
+  .tag.t-construct{ background:var(--tint-indigo); color:var(--on-tint-indigo); }
   .tag.muted{ background:var(--tint-ink); color:var(--sub); }
 
   .badge{
@@ -260,10 +255,10 @@
     font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; text-indent:0;
   }
   .badge::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
-  .badge.done{ background:var(--tint-aqua); color:var(--on-tint-aqua); }
-  .badge.pdf{ background:var(--tint-apricot); color:var(--on-tint-apricot); }
+  .badge.done{ background:var(--tint-green); color:var(--on-tint-green); }
+  .badge.pdf{ background:var(--tint-blue); color:var(--on-tint-blue); }
   .badge.ext{ background:var(--tint-ink); color:var(--sub); }
-  .badge.review{ background:var(--tint-coral); color:var(--on-tint-coral); }
+  .badge.review{ background:var(--tint-red); color:var(--on-tint-red); }
 
   /* ================= FLOATING CHROME ================= */
   .chrome{
@@ -276,7 +271,7 @@
   .brand{ display:flex; align-items:center; gap:10px; height:var(--bar); padding:0 18px 0 6px; border-radius:var(--r-pill); min-width:0; }
   .brand-mark{
     width:calc(var(--bar) - 12px); height:calc(var(--bar) - 12px); flex:none; border-radius:50%; display:grid; place-items:center; color:var(--light);
-    background:radial-gradient(circle at 32% 26%, var(--coral-200), var(--accent) 58%, var(--coral-600));
+    background:radial-gradient(circle at 30% 24%, var(--cyan), var(--blue-light) 40%, var(--indigo));
     box-shadow:inset 0 1px 1px color-mix(in srgb, var(--light) 60%, transparent), 0 2px 8px var(--accent-glow);
   }
   .brand-mark .ic{ stroke-width:2; }
@@ -317,7 +312,7 @@
     transition:transform var(--d2) var(--spring), background-color var(--d1);
   }
   .filterbtn:active{ transform:scale(.96); }
-  .filterbtn.active{ background:color-mix(in srgb, var(--vibrant-coral) 12%, var(--mat-thick)); color:var(--on-tint-coral); }
+  .filterbtn.active{ background:color-mix(in srgb, var(--blue) 12%, var(--mat-thick)); color:var(--on-tint-blue); }
   .filterbtn .chev{ width:14px; height:14px; color:var(--sub); transition:transform var(--d2) var(--ease); }
   .filterbtn.open .chev{ transform:rotate(180deg); }
   .filterbtn .n{
@@ -336,7 +331,7 @@
   .popfoot{ display:flex; justify-content:space-between; gap:8px; margin-top:4px; padding:8px 4px 2px; border-top:1px solid var(--line); }
   .clearbtn{
     height:var(--control); padding:0 14px; border:0; border-radius:var(--r-pill); cursor:pointer;
-    color:var(--on-tint-coral); font-size:var(--fs-foot); font-weight:600;
+    color:var(--on-tint-blue); font-size:var(--fs-foot); font-weight:600;
   }
   .stat{
     flex:none; height:var(--control); display:flex; align-items:center; gap:4px; padding:0 14px; border-radius:var(--r-pill);
@@ -405,7 +400,7 @@
   }
   .node.dim{ opacity:.14; }
   .node.root circle{ fill:var(--map-root); stroke-width:4; filter:drop-shadow(0 4px 10px var(--accent-glow)); }
-  .node.root text{ font-family:var(--font-head); font-weight:400; font-size:16px; font-synthesis:none; }
+  .node.root text{ font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:-.015em; }
   .node.section circle{ fill:var(--map-section); stroke-width:2.5; filter:drop-shadow(0 2px 4px var(--ink-a22)); }
   .node.section text{ font-weight:600; }
   .node.section.unsorted circle{ fill:var(--map-review); }
